@@ -208,6 +208,13 @@ select.btn { padding-right: 10px; }
 /* computer: il QR grande sta nel piè di pagina */
 footer .qr-app { margin-top: 22px; }
 footer .qr-app .qr-img svg { width: 150px; height: 150px; }
+/* computer: il QR a destra, allineato al disclaimer (testi a sinistra) */
+@media (min-width: 601px) {
+  footer .wrap:has(> .qr-app:not([hidden])) { display: grid; grid-template-columns: minmax(0, 1fr) auto; column-gap: 32px; align-items: start; }
+  footer .wrap > * { grid-column: 1; }
+  footer .wrap > .perche { grid-column: 1 / -1; }
+  footer .wrap > .qr-app { grid-column: 2; grid-row: 2 / span 3; margin-top: 0; align-self: start; justify-self: end; }
+}
 /* banner dell'app a destra della lista (schermata iniziale, schermi larghi); segue lo scorrimento */
 .promo-app { display: none; }
 @media (min-width: 1180px) {
