@@ -1352,6 +1352,17 @@ function modoReset(si) {
   if (si && sezElenco.parentNode !== sezHero) sezHero.appendChild(sezElenco);
   if (!si && sezElenco.parentNode === sezHero) sezHero.after(sezElenco);
 }
+// App, tab LANDI XL: barra sopra i risultati con il numero e il tasto per azzerare (come nel tab AGROLA)
+const ICO_AZZERA = '<svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M4.5 12a7.5 7.5 0 1 0 2.2-5.3" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/><path d="M4 3.5v4.5h4.5" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+const barraLandi = n => '<div class="app-barra"><span class="app-conta">' + esc(n === 1 ? t("n_ris1") : t("n_ris", { n })) + '</span><button type="button" class="btn lente" id="landi-azzera" aria-label="' + esc(t("azzera")) + '" title="' + esc(t("azzera")) + '">' + ICO_AZZERA + "</button></div>";
+document.addEventListener("click", e => {
+  if (!e.target.closest("#landi-azzera")) return;
+  stato.origine = null; stato.ct = null; stato.messaggio = null;
+  store.set("agrolandia.origine", null);
+  q.value = ""; sugg.hidden = true; $("cantone").value = "";
+  scriviStato(); render();
+  window.scrollTo({ top: 0, behavior: "smooth" });
+});
 function render() {
   const o = stato.origine;
   modoReset(!o);
@@ -1387,7 +1398,7 @@ function render() {
       (nota ? '<div class="nota-card">' + esc(nota) + "</div>" : "") + schede.map(n => card(n, delCt.length ? null : distanza(o, n), "prop")).join("") +
       (fuori ? '<h3 class="altri-titolo">' + esc(t("ct_ag_fuori")) + "</h3>" + card(fuori, null, "prop") : "");
     stato.stazione = schede.find(conAgrola) || fuori;
-    $("proposte").innerHTML = html;
+    $("proposte").innerHTML = (APP ? barraLandi(schede.length + (fuori ? 1 : 0)) : "") + html;
     renderPompa();
     // distanze solo se il cantone non ha LANDI XL (si propone quello più vicino)
     renderElenco(delCt.length ? lista.map(x => ({ n: x.n, km: null })) : lista);
@@ -1395,7 +1406,7 @@ function render() {
   }
   // App: come nel tab AGROLA, solo i 3 LANDI XL più vicini, dal più vicino al più lontano, schede tutte uguali
   if (APP) {
-    $("proposte").innerHTML = lista.slice(0, 3).map(x => card(x.n, x.km, "prop")).join("");
+    $("proposte").innerHTML = barraLandi(3) + lista.slice(0, 3).map(x => card(x.n, x.km, "prop")).join("");
     stato.stazione = null;
     return;
   }
