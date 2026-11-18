@@ -382,9 +382,9 @@ footer p { margin: 0 0 6px; max-width: 65ch; }
     <button type="button" class="brand" id="home" aria-label="Agrolandia"><svg class="logo" viewBox="0 0 32 32" aria-hidden="true"><rect width="32" height="32" fill="#00843D"/><path d="M0 22 C9 15 21 13 32 15 L32 21 C21 19 10 21 0 28 Z" fill="#FFD100"/></svg> <span class="brand-testo"><span class="brand-nome">Agrolandia</span></span></button>
     <div class="top-dx">
       <div class="lingue" role="group" id="lingue" aria-label="Lingua">
-        <button type="button" data-lang="it" lang="it" aria-label="Italiano">IT</button>
-        <button type="button" data-lang="fr" lang="fr" aria-label="Français">FR</button>
         <button type="button" data-lang="de" lang="de" aria-label="Deutsch">DE</button>
+        <button type="button" data-lang="fr" lang="fr" aria-label="Français">FR</button>
+        <button type="button" data-lang="it" lang="it" aria-label="Italiano">IT</button>
       </div>
     </div>
   </div>
@@ -847,10 +847,9 @@ function applicaLingua() {
   $("sez-cerca").setAttribute("aria-label", t("search_aria"));
   $("home").setAttribute("aria-label", t("home_aria"));
   document.querySelectorAll("#lingue button").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.lang === lingua)));
-  // Sito su computer: la lingua scelta va sempre a sinistra, le altre seguono nell'ordine IT, FR, DE;
-  // app e sito sul cellulare: ordine fisso DE, FR, IT (cambia solo il colore del tasto scelto)
+  // Ordine fisso DE, FR, IT ovunque (sito e app): cambia solo il colore del tasto scelto
   const box = $("lingue"), attivo = document.activeElement;
-  (APP || matchMedia("(max-width: 600px)").matches ? ["de", "fr", "it"] : [lingua].concat(["it", "fr", "de"].filter(l => l !== lingua))).forEach(l => box.appendChild(box.querySelector('[data-lang="' + l + '"]')));
+  ["de", "fr", "it"].forEach(l => box.appendChild(box.querySelector('[data-lang="' + l + '"]')));
   if (attivo && box.contains(attivo)) attivo.focus();
   riempiCantoni();
   if (stato.ct) $("f-ct").textContent = t("f_ct", { c: stato.ct });
