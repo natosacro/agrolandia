@@ -1,0 +1,1678 @@
+<!doctype html>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Agrolandia</title>
+<meta name="description" content="Trova il LANDI XL con AGROLA più vicino e i prezzi della benzina.">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" type="image/png" sizes="192x192" href="icona-192.png">
+<link rel="apple-touch-icon" href="icona-180.png">
+<meta name="theme-color" content="#FFD100">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Agrolandia">
+<script>
+/* Modalità app: con ?app nell'indirizzo o aperta dall'icona sulla schermata Home */
+(() => { try {
+  const app = new URLSearchParams(location.search).has("app") || matchMedia("(display-mode: standalone)").matches || navigator.standalone === true;
+  if (app) { document.documentElement.classList.add("app"); document.documentElement.dataset.tab = "benzina"; }
+  // vetrina: l'app mostrata in miniatura nel banner del sito (computer)
+  if (app && new URLSearchParams(location.search).has("vetrina")) document.documentElement.classList.add("vetrina");
+  // tema scelto nelle impostazioni dell'app (chiaro / scuro); senza scelta segue il telefono
+  const tema = app && JSON.parse(localStorage.getItem("agrolandia.tema") || "null");
+  if (tema === "light" || tema === "dark") document.documentElement.dataset.theme = tema;
+} catch (e) {} })();
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&family=Barlow:wght@400;500;600&family=Share+Tech+Mono&display=swap">
+<style>
+/* Layout: barra stradale in alto, colonnina disegnata come hero accanto alle proposte, elenco completo sotto. */
+:root {
+  --asfalto: #F2F3EF;      /* fondo pagina */
+  --carta: #FFFFFF;        /* superfici */
+  --riga: #D9DCD4;         /* bordi */
+  --inchiostro: #1B2220;   /* testo */
+  --grigio: #59625E;       /* testo secondario */
+  --rosso: #C9252C;        /* errori */
+  --pompa: #00873E;        /* colonnina, verde campagna */
+  --pompa-scuro: #005A2A;
+  --titolo: #005A2A;
+  --verde: #00873E;        /* AGROLA / ok */
+  --verde-tenue: #E1F2E6;
+  --giallo: #FFD200;       /* giallo cartello */
+  --primario: #00873E;
+  --primario-testo: #FFFFFF;
+  --barra: #FFD100;       /* testata: gialla, così il logo verde risalta */
+  --barra-testo: #00703A;
+  --lcd-bg: #0E1A12;
+  --lcd: #7CF29A;
+  --lcd-dim: #2C5A3A;
+  --display: "Barlow Condensed", "Arial Narrow", "Helvetica Neue", sans-serif;
+  --body: "Barlow", "Helvetica Neue", Arial, sans-serif;
+  --mono: "Share Tech Mono", ui-monospace, "SF Mono", Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --asfalto: #141817; --carta: #1D2321; --riga: #323A37; --inchiostro: #ECEFEA; --grigio: #A3ACA7;
+    --rosso: #E0474D; --pompa: #17984F; --pompa-scuro: #0B5A30; --titolo: #8FE0AE; --verde: #4DBB7F; --verde-tenue: #173322; --giallo: #F5C800; --primario: #17984F; --primario-testo: #FFFFFF;
+    --barra: #F5C800; --barra-testo: #0A4A27; --lcd-bg: #07100A; --lcd: #86F7A3; --lcd-dim: #234A30; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --asfalto: #141817; --carta: #1D2321; --riga: #323A37; --inchiostro: #ECEFEA; --grigio: #A3ACA7;
+  --rosso: #E0474D; --pompa: #17984F; --pompa-scuro: #0B5A30; --titolo: #8FE0AE; --verde: #4DBB7F; --verde-tenue: #173322; --giallo: #F5C800; --primario: #17984F; --primario-testo: #FFFFFF;
+  --barra: #F5C800; --barra-testo: #0A4A27; --lcd-bg: #07100A; --lcd: #86F7A3; --lcd-dim: #234A30; color-scheme: dark;
+}
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+html { -webkit-text-size-adjust: 100%; }
+body { margin: 0; background: var(--asfalto); color: var(--inchiostro); font: 400 16px/1.5 var(--body); }
+.wrap { max-width: 68rem; margin: 0 auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+a { color: inherit; }
+button, input, select { font: inherit; color: inherit; }
+:focus-visible { outline: 3px solid var(--giallo); outline-offset: 2px; }
+
+/* Testata */
+.top { background: var(--barra); color: var(--barra-testo); border-bottom: 3px solid var(--barra-testo); position: sticky; top: 0; z-index: 50; transition: transform .25s ease; }
+/* scorrendo verso il basso la testata sparisce, appena si risale ricompare */
+.top.nascosta { transform: translateY(-100%); }
+#proposte, .elenco { scroll-margin-top: 72px; }
+@media (prefers-reduced-motion: reduce) { .top { transition: none; } }
+.top .wrap { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding-block: 10px; }
+.brand { display: flex; align-items: center; gap: 10px; padding: 0; border: 0; background: none; cursor: pointer; color: var(--barra-testo); font: 800 1.5rem/1 var(--display); letter-spacing: .02em; text-transform: uppercase; }
+.brand:hover .brand-nome { text-decoration: underline; text-decoration-thickness: 2px; text-underline-offset: 4px; }
+.brand .logo { display: block; width: 34px; height: 34px; flex: none; border-radius: 4px; }
+.top small { font-size: .78rem; opacity: .75; text-align: right; }
+
+/* Ricerca */
+.cerca { padding-block: 18px 6px; display: grid; gap: 10px; }
+.cerca h1 { color: var(--titolo); margin: 0; font: 700 clamp(1.7rem, 5vw, 2.4rem)/1.05 var(--display); text-transform: uppercase; text-wrap: balance; }
+.riga-cerca { display: flex; gap: 8px; flex-wrap: wrap; }
+.campo { position: relative; flex: 1 1 15rem; min-width: 0; }
+.campo input { width: 100%; height: 48px; padding: 0 14px; border: 2px solid var(--inchiostro); border-radius: 6px; background: var(--carta); }
+.btn { height: 48px; padding: 0 16px; border-radius: 6px; border: 2px solid var(--inchiostro); background: var(--carta); font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; white-space: nowrap; }
+.btn.primario { background: var(--primario); color: var(--primario-testo); border-color: var(--primario); }
+.btn:hover { filter: brightness(1.08); }
+select.btn { padding-right: 10px; }
+.suggerimenti { position: absolute; z-index: 5; left: 0; right: 0; top: 52px; margin: 0; padding: 4px; list-style: none; background: var(--carta); border: 2px solid var(--inchiostro); border-radius: 6px; max-height: 16rem; overflow: auto; }
+.suggerimenti li button { width: 100%; text-align: left; padding: 9px 10px; border: 0; background: none; border-radius: 4px; cursor: pointer; }
+.suggerimenti li button:hover, .suggerimenti li button:focus { background: var(--asfalto); }
+.stato { margin: 0; font-size: .9rem; color: var(--grigio); min-height: 1.4em; }
+.stato strong { color: var(--inchiostro); }
+
+/* Hero: colonnina + proposte */
+.hero { display: grid; grid-template-columns: minmax(0, 20rem) minmax(0, 1fr); gap: 28px; padding-block: 14px 28px; align-items: start; }
+@media (max-width: 760px) { .hero { grid-template-columns: minmax(0, 1fr); } .hero .pompa-box { order: 2; } }
+
+.pompa-box { display: grid; justify-items: center; gap: 10px; }
+.pompa { position: relative; width: 100%; max-width: 19rem; }
+.pompa svg.corpo { display: block; width: 100%; height: auto; }
+.schermo { position: absolute; left: 13.5%; top: 22.5%; width: 55%; height: 37%; background: var(--lcd-bg); border-radius: 6px; padding: 7px 8px; color: var(--lcd); font-family: var(--mono); display: flex; flex-direction: column; gap: 2px; overflow: hidden; box-shadow: inset 0 0 0 2px #000, inset 0 0 18px rgba(124,242,154,.12); }
+.schermo .st { font-size: .66rem; letter-spacing: .04em; text-transform: uppercase; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--lcd); opacity: .85; }
+.schermo .p { display: flex; justify-content: space-between; align-items: baseline; gap: 4px; border-top: 1px dashed var(--lcd-dim); padding-top: 2px; }
+.schermo .p span { font-size: .62rem; opacity: .8; white-space: nowrap; }
+.schermo .p b { font-weight: 400; font-size: clamp(1.05rem, 4.6vw, 1.35rem); line-height: 1.05; font-variant-numeric: tabular-nums; text-shadow: 0 0 6px rgba(124,242,154,.55); }
+.schermo .p b.vuoto { color: var(--lcd-dim); text-shadow: none; }
+.schermo .agg { margin-top: auto; font-size: .64rem; line-height: 1.35; opacity: .85; white-space: normal; overflow-wrap: anywhere; }
+.blink { animation: lamp 1.6s steps(2, start) infinite; }
+@keyframes lamp { to { visibility: hidden; } }
+@media (prefers-reduced-motion: reduce) { .blink { animation: none; } }
+.fonte-prezzi { font-size: .82rem; color: var(--grigio); text-align: center; max-width: 19rem; margin: 0; }
+.azioni-pompa { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; }
+.azioni-pompa .btn { height: 40px; font-size: .9rem; }
+
+.segnala { width: 100%; max-width: 19rem; background: var(--carta); border: 2px solid var(--inchiostro); border-radius: 8px; padding: 12px; display: grid; gap: 8px; }
+.segnala h3 { margin: 0; font: 700 1.1rem/1.1 var(--display); text-transform: uppercase; }
+.segnala label { display: grid; grid-template-columns: 1fr 6.5rem; align-items: center; gap: 8px; font-size: .92rem; }
+.segnala input { height: 40px; padding: 0 8px; border: 1px solid var(--riga); border-radius: 4px; background: var(--asfalto); font-family: var(--mono); font-size: 1.05rem; font-variant-numeric: tabular-nums; }
+.segnala .riga-btn { display: flex; gap: 8px; }
+.segnala .riga-btn .btn { height: 40px; flex: 1; justify-content: center; }
+.errore { color: var(--rosso); font-size: .85rem; margin: 0; }
+
+.proposte { display: grid; gap: 14px; min-width: 0; }
+.proposte h2, .elenco h2 { margin: 0; font: 700 1.35rem/1.1 var(--display); text-transform: uppercase; letter-spacing: .02em; }
+.card { background: var(--carta); border: 1px solid var(--riga); border-radius: 10px; padding: 16px; display: grid; gap: 8px; min-width: 0; }
+.card.top1 { border: 3px solid var(--verde); box-shadow: 0 7px 0 -2px var(--giallo); padding: 18px; }
+.card.top1 .nome { font-size: 1.7rem; }
+.card.top1 .km { font-size: 1.9rem; }
+.card.sec { background: transparent; border: 1px solid var(--riga); border-left: 4px solid var(--riga); padding: 12px 14px; gap: 6px; }
+.card.sec .nome { font-size: 1.15rem; }
+.card.sec .km { font-size: 1.25rem; }
+.card.sec p { font-size: .92rem; }
+.card.sec .link-row { font-size: .86rem; }
+.card .testa { display: flex; justify-content: space-between; gap: 10px; align-items: flex-start; }
+.card .nome { margin: 0; font: 700 1.45rem/1.05 var(--display); text-transform: uppercase; }
+.card .km { font: 700 1.6rem/1 var(--display); white-space: nowrap; font-variant-numeric: tabular-nums; }
+.card .km small { font-size: .8rem; font-weight: 600; color: var(--grigio); display: block; text-align: right; }
+.card p { margin: 0; color: var(--grigio); }
+.etichette { display: flex; flex-wrap: wrap; gap: 6px; }
+.chip { display: inline-flex; align-items: center; gap: 6px; font-size: .78rem; font-weight: 600; padding: 3px 9px; border-radius: 999px; border: 1px solid var(--riga); text-transform: uppercase; letter-spacing: .04em; }
+.chip.si { background: var(--verde); color: var(--carta); border-color: var(--verde); }
+.chip.vicino { background: var(--verde-tenue); color: var(--verde); border-color: var(--verde); }
+.chip.no { color: var(--grigio); }
+.chip.ct { min-width: 40px; justify-content: center; font-weight: 700; letter-spacing: .08em; border: 1px solid var(--riga); }
+.link-row a.ufficiale::after { content: " ↗"; }
+.link-row { display: flex; gap: 14px; flex-wrap: wrap; font-weight: 600; font-size: .92rem; }
+.link-row a { text-underline-offset: 3px; }
+.eyebrow { font-size: .75rem; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--verde); }
+.eyebrow.alt { color: var(--grigio); }
+.altri-titolo { margin: 10px 0 0; font: 700 1.1rem/1.1 var(--display); text-transform: uppercase; letter-spacing: .02em; color: var(--grigio); }
+.orari { font-size: .88rem; }
+.orari summary { cursor: pointer; display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; list-style: none; padding: 6px 0; font-weight: 600; }
+.orari summary::-webkit-details-marker { display: none; }
+.orari summary::after { content: "▾"; color: var(--grigio); }
+.orari[open] summary::after { content: "▴"; }
+.stato-ap { font-size: .74rem; text-transform: uppercase; letter-spacing: .05em; padding: 2px 8px; border-radius: 999px; }
+.stato-ap.si { background: var(--verde-tenue); color: var(--verde); }
+.stato-ap.no { background: var(--asfalto); color: var(--rosso); border: 1px solid var(--riga); }
+.orari .settimana { display: table; width: auto; border-collapse: collapse; margin: 2px 0 6px; font-size: .86rem; }
+.orari .settimana tbody { display: table-row-group; }
+.orari .settimana th, .orari .settimana td { padding: 3px 14px 3px 0; border: 0; text-transform: none; letter-spacing: 0; font: inherit; color: var(--inchiostro); display: table-cell; }
+.orari .settimana th { font-weight: 500; color: var(--grigio); }
+.orari .settimana tr { display: table-row; padding: 0; border: 0; }
+.orari .settimana tr.oggi th, .orari .settimana tr.oggi td { font-weight: 700; color: var(--inchiostro); }
+.orari .speciali { color: var(--grigio); font-size: .82rem; }
+.orari .speciali ul { margin: 4px 0 6px; padding-left: 18px; }
+.orari .fonte-orari { font-size: .78rem; color: var(--grigio); }
+.orari .lbl-orari { font-size: .72rem; text-transform: uppercase; letter-spacing: .06em; color: var(--verde); min-width: 9.5em; }
+.orari.ag .lbl-orari { color: var(--grigio); }
+.orari.ag { border-top: 1px dashed var(--riga); }
+.aperti { font-size: .86rem; margin: 2px 0 4px; }
+.aperti summary { cursor: pointer; display: inline-block; list-style: none; padding: 6px 12px; border-radius: 999px; background: var(--giallo); color: #1B2220; font-weight: 700; }
+.aperti summary::-webkit-details-marker { display: none; }
+.aperti ul { margin: 6px 0 2px; padding-left: 18px; }
+.vai-ct { cursor: pointer; border: 0; font: inherit; }
+.vai-ct:hover { filter: brightness(1.1); text-decoration: underline; }
+.mini-lcd { display: inline-grid; width: max-content; max-width: 100%; align-self: flex-start; justify-self: start; grid-template-columns: auto auto; align-items: baseline; gap: 1px 14px; margin: 6px 0 2px; padding: 6px 10px 5px; border-radius: 6px; background: var(--lcd-bg); color: var(--lcd); font-family: var(--mono); box-shadow: inset 0 0 0 2px #000, inset 0 0 14px rgba(124,242,154,.12); }
+.mini-lcd span { font-size: .62rem; opacity: .8; }
+.mini-lcd b { font-weight: 400; font-size: 1.05rem; line-height: 1.15; font-variant-numeric: tabular-nums; text-shadow: 0 0 6px rgba(124,242,154,.55); text-align: right; }
+.mini-lcd b.vuoto { color: var(--lcd-dim); text-shadow: none; }
+/* nell'elenco, su computer, i display stanno allineati a destra */
+@media (min-width: 601px) {
+  #righe td.c-agrola { position: relative; padding-right: 200px; }
+  #righe .mini-lcd { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); margin: 0; }
+}
+.mini-lcd.solo-mob { display: none; }
+.tcs-mob { display: none; padding-block: 4px 22px; text-align: center; }
+.tcs-mob .btn { font-size: .9rem; }
+@media (max-width: 600px) {
+  .mini-lcd.solo-mob { display: inline-grid; }
+  /* sul cellulare niente pompa: i prezzi sono nei display delle proposte */
+  .hero .pompa-box { display: none !important; }
+  .tcs-mob { display: block; }
+}
+.mini-lcd small { grid-column: 1 / -1; max-width: 16em; margin-top: 2px; font-size: .6rem; line-height: 1.3; opacity: .75; }
+/* ---------- Invito a installare l'app: QR (computer, schermata iniziale) e banner (cellulare) ---------- */
+.qr-app { display: flex; align-items: center; gap: 18px; margin-top: 16px; padding: 14px 16px; background: var(--carta); border: 1px solid var(--riga); border-left: 4px solid var(--verde); border-radius: 10px; max-width: 34rem; }
+.qr-app[hidden] { display: none; }
+/* schermata iniziale (computer): il QR sta a destra della lista, un po' più in basso dell'inizio, e segue lo scorrimento */
+@media (min-width: 601px) {
+  .hero.reset:has(.qr-app:not([hidden])) { grid-template-columns: minmax(0, 1fr) 200px; }
+  .hero.reset .elenco { grid-column: 1; grid-row: 1; }
+  .hero.reset .qr-app { grid-column: 2; grid-row: 1; align-self: start; flex-direction: column; align-items: center; text-align: center; gap: 10px; max-width: none; margin-top: 140px; position: sticky; top: 84px; padding: 14px 12px; border-left: 1px solid var(--riga); border-top: 4px solid var(--verde); }
+  .hero.reset .qr-app .qr-img svg { width: 150px; height: 150px; }
+}
+/* banner dell'app a sinistra della lista (schermata iniziale, schermi larghi) */
+.promo-app { display: none; }
+@media (min-width: 1180px) {
+  .hero.reset:has(.promo-app:not([hidden])) { max-width: 86rem; grid-template-columns: 236px minmax(0, 1fr) 200px; }
+  .hero.reset:has(.promo-app:not([hidden])) .elenco { grid-column: 2; }
+  .hero.reset:has(.promo-app:not([hidden])) .qr-app { grid-column: 3; }
+  .hero.reset .promo-app:not([hidden]) { display: grid; gap: 12px; grid-column: 1; grid-row: 1; align-self: start; position: sticky; top: 84px; margin-top: 64px; padding: 16px 14px; background: var(--barra); color: var(--barra-testo); border-radius: 14px; }
+}
+.promo-tel { width: 208px; height: 412px; justify-self: center; overflow: hidden; border: 7px solid #1B2220; border-radius: 26px; background: #F2F3EF; box-shadow: 0 8px 22px rgba(0,0,0,.22); }
+.promo-tel iframe { width: 390px; height: 772px; border: 0; transform: scale(.5); transform-origin: 0 0; pointer-events: none; }
+.promo-app > b { font: 700 1.3rem/1.1 var(--display); text-transform: uppercase; letter-spacing: .03em; }
+.promo-app ul { margin: 0; padding-left: 1.1em; display: grid; gap: 6px; font-size: .9rem; line-height: 1.35; font-weight: 600; }
+.promo-qr { display: flex; align-items: center; gap: 10px; font-size: .8rem; line-height: 1.3; font-weight: 600; }
+.promo-qr .qr-img svg { display: block; width: 74px; height: 74px; border-radius: 4px; }
+html.vetrina, html.vetrina body { overflow: hidden; }
+html.vetrina #app-benzina > h2, html.vetrina .benz-cerca .app-spiega { display: none; }
+html.vetrina .benz-cerca { padding-top: 14px; }
+.qr-app .qr-img svg { display: block; width: 132px; height: 132px; }
+.qr-app b { display: block; font: 700 1.1rem/1.2 var(--display); text-transform: uppercase; letter-spacing: .03em; color: var(--verde); margin-bottom: 4px; }
+.qr-app p { margin: 0; font-size: .92rem; line-height: 1.45; color: var(--grigio); }
+.banner-app { display: none; }
+@media (max-width: 600px) {
+  .qr-app { display: none !important; }
+  body.con-banner { padding-bottom: 96px; }
+  .banner-app:not([hidden]) { display: grid; grid-template-columns: 40px 1fr auto auto; align-items: center; gap: 10px; position: fixed; left: 10px; right: 10px; bottom: calc(10px + env(safe-area-inset-bottom, 0px)); z-index: 70; padding: 10px 10px 10px 12px; border-radius: 12px; background: var(--barra); color: var(--barra-testo); box-shadow: 0 6px 20px rgba(0,0,0,.25); }
+}
+.banner-app .logo-app { width: 40px; height: 40px; display: block; }
+.banner-app .ban-testo b { display: block; font: 700 1rem/1.15 var(--display); text-transform: uppercase; letter-spacing: .02em; }
+.banner-app .ban-testo span { display: block; font-size: .8rem; line-height: 1.3; }
+.banner-app .ban-btn { border: 0; border-radius: 999px; padding: 8px 14px; background: var(--barra-testo); color: var(--barra); font: 700 .88rem/1 var(--body); cursor: pointer; }
+.banner-app .ban-x { border: 0; background: none; color: var(--barra-testo); font-size: 1.4rem; line-height: 1; padding: 4px; cursor: pointer; }
+html.app .qr-app, html.app .banner-app { display: none !important; }
+
+/* ---------- Modalità app: tre tab (LANDI, Benzina, Impostazioni) ---------- */
+.app-blocco, .app-sez, .tab-app, .app-btn-lista { display: none; }
+html.app body { padding-bottom: calc(68px + env(safe-area-inset-bottom, 0px)); }
+html.app footer, html.app .pompa-box, html.app .tcs-mob, html.app .elenco, html.app .top-dx, html.app .riga-cerca { display: none !important; }
+html.app .hero { grid-template-columns: minmax(0, 1fr) !important; padding-top: 0; }
+/* tab LANDI: niente prezzi, solo indirizzo e orari (più le indicazioni) */
+html.app :is(#proposte, #lista-ris) :is(.mini-lcd, .etichette, .link-row, .orari.ag, .card > .nota-card, .dir-ag) { display: none !important; }
+.chip-app { display: none; }
+button.chip-app { cursor: pointer; background: var(--verde-tenue); color: inherit; font-family: inherit; }
+html.app #benz-ris .card.evidenzia { outline: 3px solid var(--giallo); outline-offset: 2px; }
+html.app :is(#proposte, #lista-ris) .chip-app { display: inline-block; justify-self: start; width: max-content; }
+html.app[data-tab="cerca"] .app-sez { display: none; }
+html.app[data-tab="cerca"][data-lista="1"] .hero { display: none; }
+html.app[data-tab="cerca"][data-lista="1"] #app-lista { display: grid; }
+html.app .app-btn-lista { display: flex; width: 100%; margin-top: 14px; justify-content: center; }
+html.app .app-btn-lista[aria-pressed="true"] { background: var(--verde); color: var(--giallo); border-color: var(--verde); }
+html.app .app-barra { display: flex; align-items: center; gap: 10px; }
+html.app .app-conta { flex: 1; font-size: .88rem; color: var(--grigio); }
+html.app .lente { width: 44px; padding: 0; justify-content: center; }
+html.app .lente[aria-pressed="true"], html.app .filtro-ag[aria-pressed="true"] { background: var(--verde); color: var(--giallo); border-color: var(--verde); }
+html.app .app-cerca-q { width: 100%; }
+html.app #stato:empty, html.app #proposte:empty { display: none; }
+.btn-naviga { display: none; }
+html.app .btn-naviga { display: flex; width: 100%; min-height: 48px; margin: 10px 0 4px; justify-content: center; align-items: center; gap: 10px; font: 700 1.08rem/1 var(--display); letter-spacing: .06em; text-transform: uppercase; text-decoration: none; border-radius: 10px; }
+html.app .btn-naviga svg { transform: rotate(45deg); }
+html.app .interruttore { display: flex; align-items: center; gap: 10px; font-weight: 600; cursor: pointer; }
+html.app .interruttore input { width: 22px; height: 22px; accent-color: var(--verde); }
+html.app .app-ris { display: grid; gap: 12px; }
+html.app[data-tab="benzina"] #sez-cerca, html.app[data-tab="benzina"] .hero, html.app[data-tab="benzina"] #app-info { display: none; }
+html.app[data-tab="benzina"] #app-benzina { display: grid; }
+html.app .benz-cerca { display: grid !important; margin-top: 0; }
+html.app .benz-cerca #q2, html.app .benz-cerca #btn-pos2 { width: 100%; }
+html.app #benz-ris { display: grid; gap: 12px; }
+html.app[data-tab="info"] #sez-cerca, html.app[data-tab="info"] .hero, html.app[data-tab="info"] #app-benzina { display: none; }
+html.app[data-tab="info"] #app-info { display: grid; }
+html.app .app-blocco { display: grid; gap: 8px; margin-top: 14px; padding: 12px 14px; border-radius: 10px; background: var(--carta); border: 1px solid var(--riga); border-left: 4px solid var(--verde); }
+html.app .app-spiega { margin: 0; font-size: .95rem; line-height: 1.45; }
+html.app .app-spiega b { display: block; font: 700 1.05rem/1.2 var(--display); text-transform: uppercase; letter-spacing: .03em; color: var(--verde); margin-bottom: 2px; }
+html.app .app-blocco .campo { position: relative; }
+html.app .app-blocco #q, html.app .app-blocco #btn-pos, html.app .app-blocco #cantone { width: 100%; }
+html.app .app-sez { gap: 12px; padding-block: 14px 24px; }
+html.app .app-sez > h2 { margin: 0; font: 700 1.35rem/1.1 var(--display); text-transform: uppercase; letter-spacing: .02em; color: var(--inchiostro); }
+html.app .app-scheda { padding: 12px 14px; border-radius: 10px; background: var(--carta); border: 1px solid var(--riga); }
+html.app .app-scheda h3 { margin: 0 0 6px; font: 700 1.05rem/1.2 var(--display); text-transform: uppercase; letter-spacing: .03em; color: var(--verde); }
+html.app .app-scheda p { margin: 0 0 8px; font-size: .93rem; line-height: 1.5; }
+html.app .app-link { display: flex; flex-wrap: wrap; gap: 8px; background: none; border: 0; padding: 0; }
+html.app :is(#app-lingua .lingue, #tema) { border-color: var(--verde); }
+html.app #tema { width: max-content; max-width: 100%; }
+:root[data-theme="dark"].app :is(#app-lingua .lingue, #tema) button[aria-pressed="true"] { color: #0A2A17; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]).app :is(#app-lingua .lingue, #tema) button[aria-pressed="true"] { color: #0A2A17; } }
+html.app #tema button { padding: 0 14px; }
+html.app :is(#app-lingua .lingue, #tema) button { color: var(--verde); }
+html.app #tema button + button { border-left-color: var(--verde); }
+html.app :is(#app-lingua .lingue, #tema) button[aria-pressed="true"] { background: var(--verde); color: var(--giallo); }
+html.app #app-benzina .card .mini-lcd { display: inline-grid; }
+html.app .tab-app { display: grid; grid-template-columns: repeat(3, 1fr); position: fixed; left: 0; right: 0; bottom: 0; z-index: 60; background: var(--barra); border-top: 3px solid var(--barra-testo); padding-bottom: env(safe-area-inset-bottom, 0px); }
+html.app .tab-app button { display: grid; justify-items: center; gap: 1px; padding: 8px 4px 9px; border: 0; background: none; color: var(--barra-testo); font: 600 .78rem/1.1 var(--body); cursor: pointer; }
+html.app .tab-app button span { font-size: 1.25rem; line-height: 1; }
+html.app .tab-app .tab-ico { width: 24px; height: 24px; display: block; }
+html.app .tab-app button[aria-current="page"] { background: var(--barra-testo); color: var(--barra); }
+.orari-oggi.nd { font-size: .82rem; color: var(--grigio); }
+.nota-card { font-size: .88rem; padding: 10px 12px; border-radius: 8px; background: var(--asfalto); color: var(--grigio); }
+
+/* Elenco */
+.elenco { padding-block: 8px 40px; display: grid; gap: 12px; }
+.elenco.in-hero { padding: 0; max-width: none; margin: 0; min-width: 0; }
+.hero.reset { grid-template-columns: minmax(0, 1fr); }
+.hero.reset .pompa-box { display: none; }
+.hero.cantone { grid-template-columns: minmax(0, 1fr); }
+.hero.cantone .pompa-box { display: none; }
+.elenco.in-hero th:last-child, .elenco.in-hero td.num { display: none; }
+.filtri { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+.filtri .btn { height: 40px; font-size: .9rem; }
+.btn[aria-pressed="true"] { background: var(--primario); color: var(--primario-testo); border-color: var(--primario); }
+.tabella-box { overflow-x: auto; background: var(--carta); border: 1px solid var(--riga); border-radius: 10px; }
+/* Elenco chiuso: chiaro fino al 2°, sfuma dalla fine del 2°, tasto "Mostra tutto" sulla sfumatura */
+.tabella-box.chiusa { position: relative; overflow: hidden; }
+.tabella-box.chiusa::after { content: ""; position: absolute; left: 0; right: 0; top: var(--sfuma, 70%); bottom: 0; background: linear-gradient(to bottom, rgba(0,0,0,0), var(--carta) 85%); pointer-events: none; }
+.mostra-tutto { display: block; position: relative; z-index: 1; margin: -26px auto 0; padding: 12px 28px; border: 0; border-radius: 999px; background: var(--verde); color: var(--giallo); font: 800 1rem/1 var(--display); letter-spacing: .08em; text-transform: uppercase; cursor: pointer; box-shadow: 0 4px 12px rgba(0,0,0,.18); }
+.mostra-tutto:hover { filter: brightness(1.08); }
+.mostra-tutto[hidden] { display: none; }
+.mostra-tutto.meno { margin-top: 14px; }
+table { width: 100%; border-collapse: collapse; font-size: .93rem; }
+th, td { text-align: left; padding: 10px 12px; border-bottom: 1px solid var(--riga); vertical-align: top; }
+th { font: 700 .82rem/1.2 var(--body); text-transform: uppercase; letter-spacing: .06em; color: var(--grigio); white-space: nowrap; }
+tr:last-child td { border-bottom: 0; }
+td.num { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+td .sub { display: block; color: var(--grigio); font-size: .84rem; }
+.solo-mob { display: none; }
+.ag-vicino summary { cursor: pointer; list-style: none; display: inline-block; }
+.ag-vicino summary::-webkit-details-marker { display: none; }
+.ag-vicino[open] summary .chip { background: var(--verde-tenue); }
+.ag-vicino > .sub { display: block; margin: 6px 0 2px; }
+@media (max-width: 600px) {
+  .solo-desk { display: none !important; }
+  .solo-mob { display: inline-block; }
+  details.solo-mob { display: block; }
+  thead { display: none; }
+  table, tbody, tr, td { display: block; width: 100%; }
+  tr { padding: 10px 12px; border-bottom: 1px solid var(--riga); display: grid; grid-template-columns: 1fr auto; gap: 2px 10px; }
+  td { padding: 0; border: 0; }
+  td.c-nome { grid-column: 1; }
+  td.num { grid-column: 2; grid-row: 1; }
+  td.c-agrola { grid-column: 1 / -1; }
+  td.c-ct { display: none; }
+}
+footer { padding-block: 20px 32px; color: var(--grigio); font-size: .85rem; border-top: 1px solid var(--riga); }
+footer p { margin: 0 0 6px; max-width: 65ch; }
+.perche { margin: 0 0 14px; padding: 12px 14px; border-left: 4px solid var(--giallo); background: var(--carta); border-radius: 0 8px 8px 0; color: var(--inchiostro); }
+.perche summary { cursor: pointer; font: 700 1.05rem/1.2 var(--display); text-transform: uppercase; letter-spacing: .03em; color: var(--verde); }
+.perche p { margin: 8px 0 0; font-size: .92rem; line-height: 1.5; }
+.top-dx { display: flex; align-items: center; gap: 14px; }
+.lingue { display: inline-flex; border: 2px solid var(--barra-testo); border-radius: 6px; overflow: hidden; }
+.lingue button { min-width: 40px; height: 34px; padding: 0 8px; border: 0; background: transparent; color: var(--barra-testo); font: 700 .9rem/1 var(--display); letter-spacing: .08em; cursor: pointer; }
+.lingue button + button { border-left: 1px solid var(--barra-testo); }
+.lingue button[aria-pressed="true"] { background: var(--barra-testo); color: var(--barra); }
+.lingue button:focus-visible { outline-offset: -3px; }
+.brand-testo { display: grid; gap: 3px; text-align: left; }
+.brand .conteggio { font: 500 .74rem/1.1 var(--body); letter-spacing: .02em; text-transform: none; color: var(--barra-testo); opacity: .85; }
+</style>
+
+<header class="top">
+  <div class="wrap">
+    <button type="button" class="brand" id="home" aria-label="Agrolandia"><svg class="logo" viewBox="0 0 32 32" aria-hidden="true"><rect width="32" height="32" fill="#00843D"/><path d="M0 22 C9 15 21 13 32 15 L32 21 C21 19 10 21 0 28 Z" fill="#FFD100"/></svg> <span class="brand-testo"><span class="brand-nome">Agrolandia</span></span></button>
+    <div class="top-dx">
+      <div class="lingue" role="group" id="lingue" aria-label="Lingua">
+        <button type="button" data-lang="it" lang="it" aria-label="Italiano">IT</button>
+        <button type="button" data-lang="fr" lang="fr" aria-label="Français">FR</button>
+        <button type="button" data-lang="de" lang="de" aria-label="Deutsch">DE</button>
+      </div>
+    </div>
+  </div>
+</header>
+
+<main>
+  <section class="wrap cerca" id="sez-cerca" aria-label="Cerca">
+    <h1 data-i18n="h1">Il LANDI XL più vicino a te in un click</h1>
+    <div class="riga-cerca">
+      <div class="campo">
+        <label for="q" hidden data-i18n="q_label">Località o NPA</label>
+        <input id="q" type="search" placeholder="Località o NPA (es. Lugano, 6900)" autocomplete="off" aria-autocomplete="list" aria-controls="sugg">
+        <ul id="sugg" class="suggerimenti" role="listbox" hidden></ul>
+      </div>
+      <button id="btn-pos" class="btn primario" type="button">
+        <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4" fill="currentColor"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3" stroke="currentColor" stroke-width="2.2" fill="none"/><circle cx="12" cy="12" r="7.5" stroke="currentColor" stroke-width="2" fill="none"/></svg>
+        <span data-i18n="pos">Usa la mia posizione</span>
+      </button>
+      <select id="cantone" class="btn" aria-label="Cantone"></select>
+    </div>
+    <p class="stato" id="stato" aria-live="polite"></p>
+    <aside class="promo-app" id="promo-app" hidden>
+      <div class="promo-tel"><iframe id="promo-frame" title="Agrolandia app" tabindex="-1" aria-hidden="true" scrolling="no" loading="lazy"></iframe></div>
+      <b data-i18n="promo_t">L'app AGROLANDIA</b>
+      <ul>
+        <li data-i18n="promo_1">Tutti gli AGROLA TopShop della Svizzera, con i prezzi del carburante aggiornati ogni giorno</li>
+        <li data-i18n="promo_2">Tutti i 48 LANDI XL della Svizzera, con indirizzi e orari</li>
+      </ul>
+      <div class="promo-qr"><div class="qr-img" id="qr-img2"></div><span data-i18n="promo_qr">Inquadra il codice con il telefono</span></div>
+    </aside>
+    <aside class="qr-app" id="qr-app" hidden>
+      <div class="qr-img" id="qr-img"></div>
+      <div><b data-i18n="qr_t">Scarica l'app AGROLANDIA</b><p data-i18n="qr_p"></p></div>
+    </aside>
+    <div class="app-blocco" id="app-blocco-pos">
+      <p class="app-spiega"><b data-i18n="app_pos_t">Località o posizione attuale</b></p>
+    </div>
+    <div class="app-blocco" id="app-blocco-ct">
+      <p class="app-spiega"><b data-i18n="app_ct_t">Cantone</b> <span data-i18n="app_ct_p"></span></p>
+    </div>
+    <button type="button" class="btn app-btn-lista" id="btn-lista" aria-pressed="false" data-i18n="lista_btn">Lista completa dei LANDI XL in Svizzera</button>
+  </section>
+  <section class="wrap app-sez" id="app-lista">
+    <h2 data-i18n="list_title">Tutti i LANDI XL</h2>
+    <div class="app-barra">
+      <button type="button" class="btn filtro-ag" id="lista-ag" aria-pressed="false" data-i18n="m_si">con AGROLA</button>
+      <span class="app-conta" id="lista-conta"></span>
+      <button type="button" class="btn lente" id="lista-azzera" data-i18n-aria="azzera"><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M4.5 12a7.5 7.5 0 1 0 2.2-5.3" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/><path d="M4 3.5v4.5h4.5" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+      <button type="button" class="btn lente" id="lista-lente" aria-label="Cerca"><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5" fill="none" stroke="currentColor" stroke-width="2.4"/><path d="M15.5 15.5 21 21" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/></svg></button>
+    </div>
+    <input id="lista-q" class="app-cerca-q" type="search" autocomplete="off" hidden>
+    <div id="lista-ris" class="app-ris"></div>
+  </section>
+
+  <section class="wrap hero">
+    <div class="pompa-box">
+      <div class="pompa" id="pompa" aria-label="Colonnina con i prezzi della stazione AGROLA più vicina">
+        <svg class="corpo" viewBox="0 0 300 420" aria-hidden="true">
+          <!-- basamento -->
+          <rect x="18" y="388" width="226" height="22" rx="3" fill="#3B4340"/>
+          <rect x="10" y="404" width="242" height="12" rx="3" fill="#2A302E"/>
+          <!-- corpo -->
+          <path d="M30 70 Q30 30 70 30 H192 Q232 30 232 70 V392 H30 Z" fill="var(--pompa)"/>
+          <path d="M30 70 Q30 30 70 30 H80 Q44 36 44 76 V392 H30 Z" fill="var(--pompa-scuro)" opacity=".5"/>
+          <!-- logo AGROLA in cima -->
+          <rect x="101" y="0" width="60" height="60" rx="12" fill="#1B2220"/>
+          <rect x="104" y="3" width="54" height="54" rx="10" fill="#0E6B47"/>
+          <rect x="108" y="7" width="46" height="46" rx="7" fill="none" stroke="#F4F1E8" stroke-width="2.5"/>
+          <rect x="117" y="16" width="17" height="26" rx="3" fill="#F2C230"/>
+          <rect x="120" y="19" width="11" height="7" rx="1" fill="#0E6B47"/>
+          <rect x="114" y="40" width="23" height="5" rx="1.5" fill="#F2C230"/>
+          <path d="M134 25 h3 a3 3 0 0 1 3 3 v10 a2.5 2.5 0 0 0 5 0 V24" stroke="#F2C230" stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M141 13 L145 18" stroke="#F2C230" stroke-width="3" stroke-linecap="round"/>
+          <text x="131" y="79" text-anchor="middle" font-family="Barlow Condensed, Arial Narrow, sans-serif" font-weight="800" font-size="15" fill="#F4F1E8" letter-spacing="3">AGROLA</text>
+          <!-- cornice schermo -->
+          <rect x="34" y="88" width="178" height="168" rx="12" fill="#1B2220"/>
+          <!-- viti -->
+          <circle cx="44" cy="98" r="3" fill="#59625E"/><circle cx="202" cy="98" r="3" fill="#59625E"/>
+          <circle cx="44" cy="246" r="3" fill="#59625E"/><circle cx="202" cy="246" r="3" fill="#59625E"/>
+          <!-- pannello inferiore -->
+          <rect x="50" y="276" width="146" height="94" rx="6" fill="#F4F1E8" opacity=".95"/>
+          <rect x="62" y="290" width="38" height="24" rx="3" fill="var(--verde)"/>
+          <rect x="104" y="290" width="38" height="24" rx="3" fill="var(--giallo)"/>
+          <rect x="146" y="290" width="38" height="24" rx="3" fill="#1B2220"/>
+          <text x="81" y="306" text-anchor="middle" font-family="Barlow, Arial, sans-serif" font-weight="700" font-size="11" fill="#fff">95</text>
+          <text x="123" y="306" text-anchor="middle" font-family="Barlow, Arial, sans-serif" font-weight="700" font-size="11" fill="#1B2220">98</text>
+          <text x="165" y="306" text-anchor="middle" font-family="Barlow, Arial, sans-serif" font-weight="700" font-size="11" fill="#fff">D</text>
+          <text x="123" y="345" text-anchor="middle" font-family="Barlow Condensed, Arial Narrow, sans-serif" font-weight="700" font-size="15" fill="#1B2220" letter-spacing="1.5" data-i18n="per_litre">CHF / LITRO</text>
+          <!-- supporto pistola -->
+          <rect x="232" y="150" width="26" height="56" rx="4" fill="#2A302E"/>
+          <!-- tubo -->
+          <path d="M245 206 C 260 290, 290 320, 276 380 C 268 404, 238 400, 236 378" stroke="#1B2220" stroke-width="9" fill="none" stroke-linecap="round"/>
+          <!-- pistola -->
+          <path d="M238 150 L262 128 L276 136 L258 160 Z" fill="#2A302E"/>
+          <path d="M262 128 L290 118 L292 126 L272 136 Z" fill="#59625E"/>
+        </svg>
+        <div class="schermo" id="schermo">
+          <div class="st" id="lcd-st" data-i18n="lcd_search">Cerco la stazione…</div>
+          <div class="p"><span data-i18n="f95u">SENZA PIOMBO 95</span><b id="lcd-95" class="vuoto">-.--</b></div>
+          <div class="p"><span data-i18n="f98u">SUPER 98</span><b id="lcd-98" class="vuoto">-.--</b></div>
+          <div class="p"><span data-i18n="fdu">DIESEL</span><b id="lcd-d" class="vuoto">-.--</b></div>
+          <div class="agg" id="lcd-agg"><span class="blink">●</span> <span data-i18n="lcd_wait">in attesa</span></div>
+        </div>
+      </div>
+      <p class="fonte-prezzi" id="fonte-prezzi" data-i18n="src_default">Prezzi in CHF al litro.</p>
+      <div class="azioni-pompa">
+        <button class="btn" type="button" id="btn-segnala" data-i18n="btn_report">Ho visto un prezzo</button>
+        <a class="btn" href="https://benzin.tcs.ch/" target="_blank" rel="noopener" data-i18n="btn_tcs">Verifica i prezzi su TCS</a>
+      </div>
+      <form class="segnala" id="form-segnala" hidden>
+        <h3 id="segnala-titolo">AGROLA</h3>
+        <label for="in-95"><span data-i18n="f95">Senza piombo 95</span> <input id="in-95" inputmode="decimal" placeholder="1.94"></label>
+        <label for="in-98"><span data-i18n="f98">Super 98</span> <input id="in-98" inputmode="decimal" placeholder="2.05"></label>
+        <label for="in-d"><span data-i18n="fd">Diesel</span> <input id="in-d" inputmode="decimal" placeholder="2.32"></label>
+        <p class="errore" id="err-segnala" hidden></p>
+        <div class="riga-btn">
+          <button class="btn primario" type="submit" data-i18n="save">Salva</button>
+          <button class="btn" type="button" id="btn-annulla" data-i18n="cancel">Annulla</button>
+        </div>
+      </form>
+    </div>
+
+    <div class="proposte" id="proposte" aria-live="polite"></div>
+  </section>
+
+  <section class="wrap elenco" aria-labelledby="t-elenco">
+    <h2 id="t-elenco" data-i18n="list_title">Tutti i LANDI XL</h2>
+    <div class="filtri">
+      <button class="btn" type="button" id="f-tutti" aria-pressed="true" data-i18n="f_all">Tutti (48)</button>
+      <button class="btn" type="button" id="f-agrola" aria-pressed="false" data-i18n="f_agrola">Con AGROLA (31)</button>
+      <button class="btn" type="button" id="f-ct" aria-pressed="false" hidden></button>
+    </div>
+    <div class="tabella-box">
+      <table>
+        <thead><tr><th data-i18n="th_store">Negozio</th><th class="c-ct" data-i18n="th_ct">Cantone</th><th>AGROLA TopShop</th><th style="text-align:right" data-i18n="th_dist">Distanza</th></tr></thead>
+        <tbody id="righe"></tbody>
+      </table>
+    </div>
+    <button type="button" class="mostra-tutto" id="mostra-tutto" hidden>MOSTRA TUTTO</button>
+  </section>
+  <!-- Solo cellulare (dove la pompa non c'è): rimando ai prezzi sul sito del TCS -->
+  <section class="wrap app-sez" id="app-benzina">
+    <h2 data-i18n="benz_t">Tutti gli AGROLA TopShop</h2>
+    <div class="app-blocco benz-cerca">
+      <p class="app-spiega"><b data-i18n="app_pos_t">Località o posizione attuale</b> <span data-i18n="benz_p"></span></p>
+      <div class="campo"><input id="q2" type="search" autocomplete="off" aria-autocomplete="list" aria-controls="sugg2"><ul id="sugg2" class="suggerimenti" role="listbox" hidden></ul></div>
+      <button id="btn-pos2" class="btn primario" type="button"><svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4" fill="currentColor"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3" stroke="currentColor" stroke-width="2.2" fill="none"/><circle cx="12" cy="12" r="7.5" stroke="currentColor" stroke-width="2" fill="none"/></svg><span data-i18n="pos">Usa la mia posizione</span></button>
+    </div>
+    <div class="app-barra">
+      <span class="app-conta" id="benz-conta"></span>
+      <button type="button" class="btn lente" id="benz-azzera" data-i18n-aria="azzera"><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M4.5 12a7.5 7.5 0 1 0 2.2-5.3" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/><path d="M4 3.5v4.5h4.5" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+      <button type="button" class="btn lente" id="benz-lente" aria-label="Cerca"><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5" fill="none" stroke="currentColor" stroke-width="2.4"/><path d="M15.5 15.5 21 21" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/></svg></button>
+    </div>
+    <input id="benz-q" class="app-cerca-q" type="search" autocomplete="off" hidden>
+    <div id="benz-ris" class="app-ris" aria-live="polite"></div>
+  </section>
+  <section class="wrap app-sez" id="app-info">
+    <h2 data-i18n="tab_info">Impostazioni</h2>
+    <div class="app-scheda"><h3 data-i18n="info_lingua">Lingua</h3><div id="app-lingua"></div></div>
+    <div class="app-scheda"><h3 data-i18n="ricorda_t">Posizione</h3><label class="interruttore"><input type="checkbox" id="ricorda"> <span data-i18n="ricorda_l">Ricorda l'ultima posizione</span></label><p class="app-conta" data-i18n="ricorda_p"></p></div>
+    <div class="app-scheda"><h3 data-i18n="tema_t">Tema</h3><div class="lingue" role="group" id="tema" aria-label="Tema"><button type="button" data-tema="auto" data-i18n="tema_auto">Automatico</button><button type="button" data-tema="light" data-i18n="tema_chiaro">Chiaro</button><button type="button" data-tema="dark" data-i18n="tema_scuro">Scuro</button></div></div>
+    <div class="app-scheda"><h3 data-i18n="why_t">Perché Agrolandia?</h3><p data-i18n="why_p"></p></div>
+    <div class="app-scheda"><h3 data-i18n="info_chi_t">Progetto volontario</h3><p data-i18n="info_chi_p"></p><p data-i18n="info_priv"></p></div>
+    <div class="app-scheda app-link"><a class="btn" href="https://benzin.tcs.ch/" target="_blank" rel="noopener" data-i18n="btn_tcs">Verifica i prezzi su TCS</a> <a class="btn" href="./" data-i18n="info_sito">Apri il sito completo</a></div>
+  </section>
+  <div class="wrap tcs-mob"><a class="btn" href="https://benzin.tcs.ch/" target="_blank" rel="noopener" data-i18n="btn_tcs">Verifica i prezzi su TCS</a></div>
+</main>
+
+<div class="banner-app" id="banner-app" hidden>
+  <svg class="logo-app" viewBox="0 0 32 32" aria-hidden="true"><rect width="32" height="32" rx="5" fill="#00843D"/><path d="M0 22 C9 15 21 13 32 15 L32 21 C21 19 10 21 0 28 Z" fill="#FFD100"/></svg>
+  <div class="ban-testo"><b data-i18n="ban_t">Scarica l'app AGROLANDIA</b><span id="ban-p" data-i18n="ban_p"></span></div>
+  <button type="button" class="ban-btn" id="ban-btn" data-i18n="ban_btn">Installa</button>
+  <button type="button" class="ban-x" id="ban-x" aria-label="×">×</button>
+</div>
+
+<nav class="tab-app" id="tab-app" aria-label="Agrolandia">
+  <button type="button" data-tab="benzina"><svg class="tab-ico" viewBox="101 0 60 60" aria-hidden="true"><rect x="101" y="0" width="60" height="60" rx="12" fill="#1B2220"/><rect x="104" y="3" width="54" height="54" rx="10" fill="#0E6B47"/><rect x="108" y="7" width="46" height="46" rx="7" fill="none" stroke="#F4F1E8" stroke-width="2.5"/><rect x="117" y="16" width="17" height="26" rx="3" fill="#F2C230"/><rect x="120" y="19" width="11" height="7" rx="1" fill="#0E6B47"/><rect x="114" y="40" width="23" height="5" rx="1.5" fill="#F2C230"/><path d="M134 25 h3 a3 3 0 0 1 3 3 v10 a2.5 2.5 0 0 0 5 0 V24" stroke="#F2C230" stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round"/><path d="M141 13 L145 18" stroke="#F2C230" stroke-width="3" stroke-linecap="round"/></svg><b data-i18n="tab_benz">Benzina</b></button>
+  <button type="button" data-tab="cerca"><svg class="tab-ico" viewBox="0 0 60 60" aria-hidden="true"><rect width="60" height="60" rx="12" fill="#1B2220"/><rect x="3" y="3" width="54" height="54" rx="10" fill="#0E6B47"/><rect x="7" y="7" width="46" height="46" rx="7" fill="none" stroke="#F4F1E8" stroke-width="2.5"/><path d="M15 29 L30 16 L45 29" stroke="#F2C230" stroke-width="4" fill="none" stroke-linecap="round" stroke-linejoin="round"/><path d="M19 28 V44 H41 V28 L30 19 Z" fill="#F2C230"/><rect x="26.5" y="33" width="7" height="11" rx="1" fill="#0E6B47"/></svg><b data-i18n="tab_landi">LANDI</b></button>
+  <button type="button" data-tab="info"><svg class="tab-ico" viewBox="0 0 60 60" aria-hidden="true"><rect width="60" height="60" rx="12" fill="#1B2220"/><rect x="3" y="3" width="54" height="54" rx="10" fill="#0E6B47"/><rect x="7" y="7" width="46" height="46" rx="7" fill="none" stroke="#F4F1E8" stroke-width="2.5"/><circle cx="30" cy="30" r="14" fill="none" stroke="#F2C230" stroke-width="6" stroke-dasharray="5.5 5.5"/><circle cx="30" cy="30" r="9.5" fill="none" stroke="#F2C230" stroke-width="6"/></svg><b data-i18n="tab_info">Impostazioni</b></button>
+</nav>
+
+<footer>
+  <div class="wrap">
+    <details class="perche">
+      <summary data-i18n="why_t">Perché Agrolandia?</summary>
+      <p data-i18n="why_p"></p>
+    </details>
+    <p data-i18n="footer1">Dati negozi: cercatore landi.ch (formato XL) e cercatore agrola.ch (filtro TopShop), stato 26.10.2026.</p>
+    <p><span data-i18n="footer2">Progetto amatoriale senza scopo commerciale, non affiliato a LANDI né ad AGROLA. Prezzi verificati:</span> <a href="https://benzin.tcs.ch/" target="_blank" rel="noopener">benzin.tcs.ch</a> · <a href="https://www.landi.ch/" target="_blank" rel="noopener">landi.ch</a></p>
+  </div>
+</footer>
+
+<script>
+"use strict";
+// Modalità app (decisa nella testata della pagina)
+const APP = document.documentElement.classList.contains("app");
+/* ---------- Testi in quattro lingue ---------- */
+const TESTI = {
+ it: {
+  hdr_count:"48 LANDI XL · 26 con AGROLA", lang_group:"Lingua", search_aria:"Cerca",
+  h1:"Il LANDI XL più vicino a te in un click", q_label:"Località o NPA", q_ph:"Località o NPA (es. Lugano, 6900)",
+  pos:"Usa la mia posizione", ct_aria:"Cantone", ct_opt:"Cantone…",
+  pump_aria:"Colonnina con i prezzi della stazione AGROLA più vicina", per_litre:"CHF / LITRO",
+  lcd_search:"Cerco la stazione…", lcd_wait:"in attesa", lcd_avg:"MEDIA CH", lcd_mine:"TUO DATO", lcd_nodata:"nessun dato", lcd_upd:"verif.",
+  f95u:"SENZA PIOMBO 95", f98u:"SUPER 98", fdu:"DIESEL", f95:"Senza piombo 95", f98:"Super 98", fd:"Diesel",
+  src_default:"Prezzi in CHF al litro.",
+  src_none:"Prezzi in CHF al litro. Nessun prezzo disponibile: tocca “Ho visto un prezzo”.",
+  src_avg:"Prezzi in CHF al litro. Per questa stazione non c'è ancora un prezzo: lo schermo mostra la media svizzera ({s}, in vigore da {d}, verificata il {v}).",
+  src_mine:"Prezzi in CHF al litro. Prezzo che hai inserito tu il {d}.",
+  src_station:"Prezzi in CHF al litro. Fonte: {s}, {d}, verificato il {v}.",
+  btn_report:"Ho visto un prezzo", btn_tcs:"Verifica i prezzi su TCS", form_title:"Prezzi AGROLA {l}", save:"Salva", cancel:"Annulla",
+  err_form:"Scrivi almeno un prezzo tra 1.00 e 4.00 CHF, ad esempio 1.94.",
+  page_landi:"Pagina LANDI", no_pos:"Nessuna posizione scelta: tocca “Usa la mia posizione”, scrivi la località o scegli il cantone.", empty_prop:"Scegli una posizione e qui compare il LANDI XL con AGROLA più vicino.", lcd_ch:"MEDIA SVIZZERA", src_ch:"Prezzi in CHF al litro. Media svizzera ({s}, in vigore da {d}, verificata il {v}). Scegli una posizione per la stazione più vicina.", home_aria:"Agrolandia, ricomincia da capo", proposals:"Le tue proposte", oggi:"Oggi", chiuso:"chiuso", aperto_ora:"aperto ora", chiuso_ora:"chiuso ora", orari_speciali:"Orari speciali", orari_nd:"Orari non disponibili", riapre:"Chiuso · riapre {g} alle {h}", domani:"domani", aperti_vicino:"LANDI XL aperti adesso nelle vicinanze", lbl_landi:"Negozio LANDI", lbl_agrola:"AGROLA TopShop", pompa24:"Colonnine 24h su 24", ct_list:"I LANDI XL del cantone {c}", ct_none:"Nel cantone {c} non ci sono LANDI XL: ecco il LANDI XL con AGROLA più vicino.", ct_none2:"Nel cantone {c} non ci sono LANDI XL: ecco il LANDI XL con AGROLA più vicino e un LANDI XL senza AGROLA ancora più vicino.", ct_ag_fuori:"Il LANDI XL con AGROLA più vicino, fuori dal cantone", giorni:["Lunedì","Martedì","Mercoledì","Giovedì","Venerdì","Sabato","Domenica"], more_props:"Altre proposte", prop_n:"Proposta {n}", in_ct:"nel tuo cantone", out_ct:"altro cantone", eyebrow1:"Proposta n. 1 · LANDI XL con AGROLA", eyebrow2:"Più vicino, ma senza AGROLA", eyebrow3:"Nello stesso cantone", others:"Altri LANDI XL nel cantone {c}", eyebrow4:"Altra proposta vicina", nearby:"Altri LANDI XL vicini",
+  chip_si:"AGROLA TopShop sul piazzale", chip_vicino:"AGROLA a due passi", chip_no:"Senza AGROLA",
+  air:"in linea d'aria", dir_landi:"Indicazioni LANDI", dir_agrola:"Indicazioni AGROLA",
+  same:"Il LANDI XL più vicino ha già AGROLA: nessuna alternativa più vicina.",
+  no_xl_ct:"Nel cantone {c} non ci sono LANDI XL: ecco i più vicini al centro del cantone.",
+  list_title:"Tutti i LANDI XL", f_all:"Tutti (48)", f_agrola:"Con AGROLA (31)", f_ct:"Solo {c}",
+  th_store:"Negozio", lcd_tcs:"TCS, rilevato il {d}", affid:{CONFIDENT:"affidabile",FEW_RECENT_PRICES:"poche segnalazioni recenti",OLD_LAST_UPDATE:"segnalazione non recente",OUTDATED_LAST_PRICE_UPDATE:"prezzo forse superato"}, th_ct:"Cantone", th_dist:"Distanza", yes:"Sì", near:"Vicino", no:"No", m_si:"con AGROLA", m_no:"senza AGROLA", m_vicino:"AGROLA nelle vicinanze", map:"mappa",
+  empty_filter:"Nessun LANDI XL con questo filtro.",
+  from:"Da:", gps:" (posizione attuale)", ctr:" (centro del cantone)", my_pos:"La tua posizione",
+  no_geo:"Il browser non dà la posizione: scrivi la tua località.", seeking:"Cerco la tua posizione…",
+  geo_fail:"Posizione non disponibile: consenti l'accesso alla posizione o scrivi la tua località.",
+  choose:"Più località corrispondono: scegli quella giusta dall'elenco.",
+  not_found:"Non trovo “{t}”. Prova con il NPA o una città vicina.",
+ 
+  nota_dist:"TopShop a ca. {d}", nota_altra:", dall'altra parte della {s}", nota_oltre:", oltre la {s}",
+  footer1:"Dati negozi: cercatore landi.ch (formato XL) e cercatore agrola.ch (filtro TopShop), stato 26.10.2026. Le distanze sono in linea d'aria da posizioni approssimative: per il percorso usa “Indicazioni”.",
+  footer2:"Progetto amatoriale senza scopo commerciale, non affiliato a LANDI né ad AGROLA. Prezzi verificati:",
+  show_all:"Mostra tutto", promo_t:"L'app AGROLANDIA", promo_1:"Tutti gli AGROLA TopShop della Svizzera, con i prezzi del carburante aggiornati ogni giorno", promo_2:"Tutti i 48 LANDI XL della Svizzera, con indirizzi e orari", promo_qr:"Inquadra il codice con il telefono", azzera:"Torna alla lista completa", nav_ag:"Percorso", tema_t:"Tema", tema_auto:"Automatico", tema_chiaro:"Chiaro", tema_scuro:"Scuro", ricorda_t:"Posizione", ricorda_l:"Ricorda l'ultima posizione", ricorda_p:"Se attivo, all'apertura l'app riparte dall'ultima località o posizione scelta. Resta salvata solo sul telefono.", lista_btn:"Lista completa dei LANDI XL in Svizzera", lista_chiudi:"Chiudi la lista completa", n_ris:"{n} risultati", n_ris1:"1 risultato", nessuno:"Nessun risultato.", cerca_ph:"Cerca per nome, via, località o NPA", benz_p:"Scrivi la località o il NPA, oppure usa la tua posizione: la lista si ordina dal TopShop più vicino. Con la lente cerchi un TopShop per nome, via o località.", qr_t:"Scarica l'app AGROLANDIA", qr_p:"Il tuo compagno di viaggio nella Svizzera rurale.", ban_t:"Scarica l'app AGROLANDIA", ban_p:"Il tuo compagno di viaggio nella Svizzera rurale.", ban_btn:"Installa", ban_ios:"Tocca il tasto Condividi e poi «Aggiungi alla schermata Home».", ban_and:"Apri il menu ⋮ di Chrome e scegli «Installa app» o «Aggiungi a schermata Home».", tab_landi:"LANDI XL", tab_benz:"AGROLA", tab_info:"Impostazioni", benz_t:"Tutti gli AGROLA TopShop", benz_vuoto:"Scegli prima una località, la tua posizione o un cantone nel tab LANDI.", benz_nd:"Prezzi TCS non disponibili per questa stazione.", info_lingua:"Lingua", info_chi_t:"Progetto volontario", info_chi_p:"Agrolandia è un progetto volontario e amatoriale, senza scopi commerciali. Non è affiliato in alcun modo a LANDI, AGROLA o TCS: negozi e orari vengono da landi.ch e agrola.ch, i prezzi dal TCS, e sono aggiornati ogni giorno.", info_priv:"La tua posizione resta sul telefono: serve solo a calcolare le distanze e non viene inviata a nessuno.", info_sito:"Apri il sito completo", tab_cerca:"Cerca", tab_ris:"Risultati", tab_prezzi:"Prezzi AGROLA", app_pos_t:"Località o posizione attuale", app_pos_p:"Scrivi la località o il NPA, oppure usa la tua posizione: trovi i LANDI XL più vicini a te, con indirizzo e orari.", app_ct_t:"Cantone", app_ct_p:"Seleziona un cantone per avere la lista completa dei LANDI XL.", show_less:"Mostra meno",
+  why_t:"Perché Agrolandia?",
+  why_p:"Amo LANDI per l'idea che c'è dietro: una cooperativa nata dagli agricoltori, legata alla terra, al Paese e ai prodotti locali. E amo AGROLA, la mia stazione preferita e tappa fissa dei miei road trip, per un caffè o uno spuntino di qualità. Agrolandia nasce per chi, come me, cerca nei LANDI XL un'ampia offerta di prodotti della terra, per il lavoro e per la casa, e vuole trovare in un click il più vicino, meglio se con un'AGROLA accanto. Un progetto amatoriale, senza scopo commerciale.",
+  cantoni:{AG:"Argovia",AI:"Appenzello Interno",AR:"Appenzello Esterno",BE:"Berna",BL:"Basilea Campagna",BS:"Basilea Città",FR:"Friburgo",GE:"Ginevra",GL:"Glarona",GR:"Grigioni",JU:"Giura",LU:"Lucerna",NE:"Neuchâtel",NW:"Nidvaldo",OW:"Obvaldo",SG:"San Gallo",SH:"Sciaffusa",SO:"Soletta",SZ:"Svitto",TG:"Turgovia",TI:"Ticino",UR:"Uri",VD:"Vaud",VS:"Vallese",ZG:"Zugo",ZH:"Zurigo"}
+ },
+ de: {
+  hdr_count:"48 LANDI XL · 26 mit AGROLA", lang_group:"Sprache", search_aria:"Suche",
+  h1:"Der nächste LANDI XL mit einem Klick", q_label:"Ort oder PLZ", q_ph:"Ort oder PLZ (z. B. Luzern, 6003)",
+  pos:"Meinen Standort verwenden", ct_aria:"Kanton", ct_opt:"Kanton…",
+  pump_aria:"Zapfsäule mit den Preisen der nächsten AGROLA-Tankstelle", per_litre:"CHF / LITER",
+  lcd_search:"Suche Tankstelle…", lcd_wait:"warte", lcd_avg:"SCHNITT CH", lcd_mine:"DEIN WERT", lcd_nodata:"keine Daten", lcd_upd:"geprüft",
+  f95u:"BLEIFREI 95", f98u:"SUPER 98", fdu:"DIESEL", f95:"Bleifrei 95", f98:"Super 98", fd:"Diesel",
+  src_default:"Preise in CHF pro Liter.",
+  src_none:"Preise in CHF pro Liter. Kein Preis verfügbar: Tippe auf «Ich habe einen Preis gesehen».",
+  src_avg:"Preise in CHF pro Liter. Für diese Tankstelle gibt es noch keinen Preis: Die Anzeige zeigt den Schweizer Durchschnitt ({s}, gültig seit {d}, geprüft am {v}).",
+  src_mine:"Preise in CHF pro Liter. Von dir eingegebener Preis vom {d}.",
+  src_station:"Preise in CHF pro Liter. Quelle: {s}, {d}, geprüft am {v}.",
+  btn_report:"Ich habe einen Preis gesehen", btn_tcs:"Preise auf TCS prüfen", form_title:"AGROLA-Preise {l}", save:"Speichern", cancel:"Abbrechen",
+  err_form:"Gib mindestens einen Preis zwischen 1.00 und 4.00 CHF ein, zum Beispiel 1.94.",
+  page_landi:"LANDI-Seite", no_pos:"Kein Standort gewählt: Tippe auf «Meinen Standort verwenden», gib deinen Ort ein oder wähle den Kanton.", empty_prop:"Wähle einen Standort, dann erscheint hier der nächste LANDI XL mit AGROLA.", lcd_ch:"SCHNITT SCHWEIZ", src_ch:"Preise in CHF pro Liter. Schweizer Durchschnitt ({s}, gültig seit {d}, geprüft am {v}). Wähle einen Standort für die nächste Tankstelle.", home_aria:"Agrolandia, neu beginnen", proposals:"Deine Vorschläge", oggi:"Heute", chiuso:"geschlossen", aperto_ora:"jetzt offen", chiuso_ora:"jetzt geschlossen", orari_speciali:"Spezielle Öffnungszeiten", orari_nd:"Öffnungszeiten nicht verfügbar", riapre:"Geschlossen · öffnet {g} um {h}", domani:"morgen", aperti_vicino:"Jetzt geöffnete LANDI XL in der Nähe", lbl_landi:"LANDI Laden", lbl_agrola:"AGROLA TopShop", pompa24:"Zapfsäulen rund um die Uhr", ct_list:"Die LANDI XL im Kanton {c}", ct_none:"Im Kanton {c} gibt es keinen LANDI XL: Hier ist der nächste LANDI XL mit AGROLA.", ct_none2:"Im Kanton {c} gibt es keinen LANDI XL: Hier sind der nächste LANDI XL mit AGROLA und ein noch näherer LANDI XL ohne AGROLA.", ct_ag_fuori:"Der nächste LANDI XL mit AGROLA, ausserhalb des Kantons", giorni:["Montag","Dienstag","Mittwoch","Donnerstag","Freitag","Samstag","Sonntag"], more_props:"Weitere Vorschläge", prop_n:"Vorschlag {n}", in_ct:"in deinem Kanton", out_ct:"anderer Kanton", eyebrow1:"Vorschlag Nr. 1 · LANDI XL mit AGROLA", eyebrow2:"Näher, aber ohne AGROLA", eyebrow3:"Im selben Kanton", others:"Weitere LANDI XL im Kanton {c}", eyebrow4:"Weiterer Vorschlag in der Nähe", nearby:"Weitere LANDI XL in der Nähe",
+  chip_si:"AGROLA TopShop auf dem Areal", chip_vicino:"AGROLA gleich nebenan", chip_no:"Ohne AGROLA",
+  air:"Luftlinie", dir_landi:"Route zu LANDI", dir_agrola:"Route zu AGROLA",
+  same:"Der nächste LANDI XL hat bereits AGROLA: Es gibt keine nähere Alternative.",
+  no_xl_ct:"Im Kanton {c} gibt es keinen LANDI XL: Hier sind die nächsten ab Kantonszentrum.",
+  list_title:"Alle LANDI XL", f_all:"Alle (48)", f_agrola:"Mit AGROLA (31)", f_ct:"Nur {c}",
+  th_store:"Filiale", lcd_tcs:"TCS, erfasst am {d}", affid:{CONFIDENT:"zuverlässig",FEW_RECENT_PRICES:"wenige aktuelle Meldungen",OLD_LAST_UPDATE:"Meldung nicht aktuell",OUTDATED_LAST_PRICE_UPDATE:"Preis evtl. veraltet"}, th_ct:"Kanton", th_dist:"Distanz", yes:"Ja", near:"In der Nähe", no:"Nein", m_si:"mit AGROLA", m_no:"ohne AGROLA", m_vicino:"AGROLA in der Nähe", map:"Karte",
+  empty_filter:"Kein LANDI XL mit diesem Filter.",
+  from:"Ab:", gps:" (aktueller Standort)", ctr:" (Kantonszentrum)", my_pos:"Dein Standort",
+  no_geo:"Der Browser liefert keinen Standort: Gib deinen Ort ein.", seeking:"Suche deinen Standort…",
+  geo_fail:"Standort nicht verfügbar: Erlaube den Zugriff auf den Standort oder gib deinen Ort ein.",
+  choose:"Mehrere Orte passen: Wähle den richtigen aus der Liste.",
+  not_found:"«{t}» nicht gefunden. Versuche es mit der PLZ oder einer Stadt in der Nähe.",
+ 
+  nota_dist:"TopShop ca. {d} entfernt", nota_altra:", auf der anderen Seite der {s}", nota_oltre:", jenseits der {s}",
+  footer1:"Filialdaten: Filialsuche landi.ch (Format XL) und Tankstellensuche agrola.ch (Filter TopShop), Stand 26.10.2026. Die Distanzen sind Luftlinie ab ungefähren Standorten: Für die Strecke «Route» verwenden.",
+  footer2:"Hobbyprojekt ohne kommerziellen Zweck, nicht mit LANDI oder AGROLA verbunden. Preise prüfen:",
+  show_all:"Alle anzeigen", promo_t:"Die App AGROLANDIA", promo_1:"Alle AGROLA TopShops der Schweiz, mit täglich aktualisierten Treibstoffpreisen", promo_2:"Alle 48 LANDI XL der Schweiz, mit Adressen und Öffnungszeiten", promo_qr:"Code mit dem Handy scannen", azzera:"Zurück zur vollständigen Liste", nav_ag:"Route", tema_t:"Darstellung", tema_auto:"Automatisch", tema_chiaro:"Hell", tema_scuro:"Dunkel", ricorda_t:"Standort", ricorda_l:"Letzten Standort merken", ricorda_p:"Wenn aktiv, startet die App mit dem zuletzt gewählten Ort oder Standort. Er wird nur auf dem Handy gespeichert.", lista_btn:"Vollständige Liste der LANDI XL in der Schweiz", lista_chiudi:"Vollständige Liste schliessen", n_ris:"{n} Ergebnisse", n_ris1:"1 Ergebnis", nessuno:"Keine Ergebnisse.", cerca_ph:"Nach Name, Strasse, Ort oder PLZ suchen", benz_p:"Gib Ort oder PLZ ein oder verwende deinen Standort: Die Liste beginnt mit dem nächsten TopShop. Mit der Lupe suchst du einen TopShop nach Name, Strasse oder Ort.", qr_t:"Lade die App AGROLANDIA herunter", qr_p:"Dein Reisebegleiter durch die ländliche Schweiz.", ban_t:"Lade die App AGROLANDIA herunter", ban_p:"Dein Reisebegleiter durch die ländliche Schweiz.", ban_btn:"Installieren", ban_ios:"Tippe auf «Teilen» und dann auf «Zum Home-Bildschirm».", ban_and:"Öffne das Chrome-Menü ⋮ und wähle «App installieren» oder «Zum Startbildschirm hinzufügen».", tab_landi:"LANDI XL", tab_benz:"AGROLA", tab_info:"Einstellungen", benz_t:"Alle AGROLA TopShops", benz_vuoto:"Wähle zuerst im Tab LANDI einen Ort, deinen Standort oder einen Kanton.", benz_nd:"Für diese Tankstelle sind keine TCS-Preise verfügbar.", info_lingua:"Sprache", info_chi_t:"Freiwilliges Projekt", info_chi_p:"Agrolandia ist ein freiwilliges Hobbyprojekt ohne kommerzielle Absichten. Es ist in keiner Weise mit LANDI, AGROLA oder dem TCS verbunden: Filialen und Öffnungszeiten stammen von landi.ch und agrola.ch, die Preise vom TCS; alles wird täglich aktualisiert.", info_priv:"Dein Standort bleibt auf dem Handy: Er dient nur zur Berechnung der Distanzen und wird an niemanden gesendet.", info_sito:"Vollständige Website öffnen", tab_cerca:"Suchen", tab_ris:"Ergebnisse", tab_prezzi:"AGROLA-Preise", app_pos_t:"Ort oder aktueller Standort", app_pos_p:"Gib Ort oder PLZ ein oder verwende deinen Standort: Du findest die nächsten LANDI XL mit Adresse und Öffnungszeiten.", app_ct_t:"Kanton", app_ct_p:"Wähle einen Kanton für die vollständige Liste der LANDI XL.", show_less:"Weniger anzeigen",
+  why_t:"Warum Agrolandia?",
+  why_p:"Ich mag LANDI wegen der Idee dahinter: eine Genossenschaft, die aus der Landwirtschaft entstanden ist, verbunden mit dem Boden, mit unserem Land und mit regionalen Produkten. Und ich mag AGROLA, meine Lieblingstankstelle und fester Halt auf meinen Roadtrips, für einen Kaffee oder einen feinen Znüni. Agrolandia ist für alle, die wie ich in den LANDI XL ein grosses Angebot an Produkten vom Land, für die Arbeit und fürs Zuhause suchen und mit einem Klick den nächsten finden möchten, am liebsten mit einer AGROLA gleich nebenan. Ein Hobbyprojekt ohne kommerziellen Zweck.",
+  cantoni:{AG:"Aargau",AI:"Appenzell Innerrhoden",AR:"Appenzell Ausserrhoden",BE:"Bern",BL:"Basel-Landschaft",BS:"Basel-Stadt",FR:"Freiburg",GE:"Genf",GL:"Glarus",GR:"Graubünden",JU:"Jura",LU:"Luzern",NE:"Neuenburg",NW:"Nidwalden",OW:"Obwalden",SG:"St. Gallen",SH:"Schaffhausen",SO:"Solothurn",SZ:"Schwyz",TG:"Thurgau",TI:"Tessin",UR:"Uri",VD:"Waadt",VS:"Wallis",ZG:"Zug",ZH:"Zürich"}
+ },
+ fr: {
+  hdr_count:"48 LANDI XL · 26 avec AGROLA", lang_group:"Langue", search_aria:"Recherche",
+  h1:"Le LANDI XL le plus proche de chez vous en un clic", q_label:"Localité ou NPA", q_ph:"Localité ou NPA (p. ex. Lausanne, 1003)",
+  pos:"Utiliser ma position", ct_aria:"Canton", ct_opt:"Canton…",
+  pump_aria:"Colonne avec les prix de la station AGROLA la plus proche", per_litre:"CHF / LITRE",
+  lcd_search:"Recherche station…", lcd_wait:"en attente", lcd_avg:"MOYENNE CH", lcd_mine:"VOTRE PRIX", lcd_nodata:"aucune donnée", lcd_upd:"vérif.",
+  f95u:"SANS PLOMB 95", f98u:"SUPER 98", fdu:"DIESEL", f95:"Sans plomb 95", f98:"Super 98", fd:"Diesel",
+  src_default:"Prix en CHF par litre.",
+  src_none:"Prix en CHF par litre. Aucun prix disponible : touchez « J'ai vu un prix ».",
+  src_avg:"Prix en CHF par litre. Pas encore de prix pour cette station : l'écran affiche la moyenne suisse ({s}, en vigueur depuis le {d}, vérifiée le {v}).",
+  src_mine:"Prix en CHF par litre. Prix que vous avez saisi le {d}.",
+  src_station:"Prix en CHF par litre. Source : {s}, {d}, vérifié le {v}.",
+  btn_report:"J'ai vu un prix", btn_tcs:"Vérifier les prix sur TCS", form_title:"Prix AGROLA {l}", save:"Enregistrer", cancel:"Annuler",
+  err_form:"Saisissez au moins un prix entre 1.00 et 4.00 CHF, par exemple 1.94.",
+  page_landi:"Page LANDI", no_pos:"Aucune position choisie : touchez « Utiliser ma position », saisissez votre localité ou choisissez le canton.", empty_prop:"Choisissez une position et le LANDI XL avec AGROLA le plus proche apparaîtra ici.", lcd_ch:"MOYENNE SUISSE", src_ch:"Prix en CHF par litre. Moyenne suisse ({s}, en vigueur depuis le {d}, vérifiée le {v}). Choisissez une position pour la station la plus proche.", home_aria:"Agrolandia, recommencer", proposals:"Vos propositions", oggi:"Aujourd'hui", chiuso:"fermé", aperto_ora:"ouvert maintenant", chiuso_ora:"fermé maintenant", orari_speciali:"Horaires spéciaux", orari_nd:"Horaires non disponibles", riapre:"Fermé · rouvre {g} à {h}", domani:"demain", aperti_vicino:"LANDI XL ouverts maintenant à proximité", lbl_landi:"Magasin LANDI", lbl_agrola:"AGROLA TopShop", pompa24:"Colonnes 24h sur 24", ct_list:"Les LANDI XL du {c}", ct_none:"Il n'y a pas de LANDI XL dans le {c} : voici le LANDI XL avec AGROLA le plus proche.", ct_none2:"Il n'y a pas de LANDI XL dans le {c} : voici le LANDI XL avec AGROLA le plus proche et un LANDI XL sans AGROLA encore plus proche.", ct_ag_fuori:"Le LANDI XL avec AGROLA le plus proche, hors du canton", giorni:["Lundi","Mardi","Mercredi","Jeudi","Vendredi","Samedi","Dimanche"], more_props:"Autres propositions", prop_n:"Proposition {n}", in_ct:"dans votre canton", out_ct:"autre canton", eyebrow1:"Proposition n° 1 · LANDI XL avec AGROLA", eyebrow2:"Plus proche, mais sans AGROLA", eyebrow3:"Dans le même canton", others:"Autres LANDI XL dans le {c}", eyebrow4:"Autre proposition proche", nearby:"Autres LANDI XL proches",
+  chip_si:"AGROLA TopShop sur le site", chip_vicino:"AGROLA à deux pas", chip_no:"Sans AGROLA",
+  air:"à vol d'oiseau", dir_landi:"Itinéraire LANDI", dir_agrola:"Itinéraire AGROLA",
+  same:"Le LANDI XL le plus proche a déjà AGROLA : pas d'alternative plus proche.",
+  no_xl_ct:"Il n'y a pas de LANDI XL dans le {c} : voici les plus proches du centre du canton.",
+  list_title:"Tous les LANDI XL", f_all:"Tous (48)", f_agrola:"Avec AGROLA (31)", f_ct:"Seulement {c}",
+  th_store:"Magasin", lcd_tcs:"TCS, relevé le {d}", affid:{CONFIDENT:"fiable",FEW_RECENT_PRICES:"peu de signalements récents",OLD_LAST_UPDATE:"signalement ancien",OUTDATED_LAST_PRICE_UPDATE:"prix peut-être dépassé"}, th_ct:"Canton", th_dist:"Distance", yes:"Oui", near:"À proximité", no:"Non", m_si:"avec AGROLA", m_no:"sans AGROLA", m_vicino:"AGROLA à proximité", map:"carte",
+  empty_filter:"Aucun LANDI XL avec ce filtre.",
+  from:"Depuis :", gps:" (position actuelle)", ctr:" (centre du canton)", my_pos:"Votre position",
+  no_geo:"Le navigateur ne fournit pas de position : saisissez votre localité.", seeking:"Recherche de votre position…",
+  geo_fail:"Position indisponible : autorisez l'accès à la position ou saisissez votre localité.",
+  choose:"Plusieurs localités correspondent : choisissez la bonne dans la liste.",
+  not_found:"« {t} » introuvable. Essayez le NPA ou une ville proche.",
+ 
+  nota_dist:"TopShop à env. {d}", nota_altra:", de l'autre côté de la {s}", nota_oltre:", au-delà de la {s}",
+  footer1:"Données des magasins : recherche de magasins landi.ch (format XL) et recherche de stations agrola.ch (filtre TopShop), état au 26.10.2026. Les distances sont à vol d'oiseau depuis des positions approximatives : pour le trajet, utilisez « Itinéraire ».",
+  footer2:"Projet amateur sans but commercial, sans lien avec LANDI ni AGROLA. Vérifier les prix :",
+  show_all:"Tout afficher", promo_t:"L'app AGROLANDIA", promo_1:"Tous les AGROLA TopShop de Suisse, avec les prix du carburant mis à jour chaque jour", promo_2:"Les 48 LANDI XL de Suisse, avec adresses et horaires", promo_qr:"Scannez le code avec votre téléphone", azzera:"Revenir à la liste complète", nav_ag:"Itinéraire", tema_t:"Thème", tema_auto:"Automatique", tema_chiaro:"Clair", tema_scuro:"Sombre", ricorda_t:"Position", ricorda_l:"Mémoriser la dernière position", ricorda_p:"Si activé, l'app redémarre depuis la dernière localité ou position choisie. Elle reste enregistrée uniquement sur le téléphone.", lista_btn:"Liste complète des LANDI XL en Suisse", lista_chiudi:"Fermer la liste complète", n_ris:"{n} résultats", n_ris1:"1 résultat", nessuno:"Aucun résultat.", cerca_ph:"Rechercher par nom, rue, localité ou NPA", benz_p:"Saisissez la localité ou le NPA, ou utilisez votre position : la liste commence par le TopShop le plus proche. Avec la loupe, cherchez un TopShop par nom, rue ou localité.", qr_t:"Téléchargez l'app AGROLANDIA", qr_p:"Votre compagnon de voyage dans la Suisse rurale.", ban_t:"Téléchargez l'app AGROLANDIA", ban_p:"Votre compagnon de voyage dans la Suisse rurale.", ban_btn:"Installer", ban_ios:"Touchez « Partager » puis « Sur l'écran d'accueil ».", ban_and:"Ouvrez le menu ⋮ de Chrome et choisissez « Installer l'application » ou « Ajouter à l'écran d'accueil ».", tab_landi:"LANDI XL", tab_benz:"AGROLA", tab_info:"Réglages", benz_t:"Tous les AGROLA TopShop", benz_vuoto:"Choisissez d'abord une localité, votre position ou un canton dans l'onglet LANDI.", benz_nd:"Pas de prix TCS pour cette station.", info_lingua:"Langue", info_chi_t:"Projet bénévole", info_chi_p:"Agrolandia est un projet bénévole et amateur, sans but commercial. Il n'est affilié d'aucune manière à LANDI, AGROLA ou au TCS : magasins et horaires proviennent de landi.ch et agrola.ch, les prix du TCS, et tout est mis à jour chaque jour.", info_priv:"Votre position reste sur le téléphone : elle sert seulement à calculer les distances et n'est envoyée à personne.", info_sito:"Ouvrir le site complet", tab_cerca:"Chercher", tab_ris:"Résultats", tab_prezzi:"Prix AGROLA", app_pos_t:"Localité ou position actuelle", app_pos_p:"Saisissez la localité ou le NPA, ou utilisez votre position : vous trouvez les LANDI XL les plus proches de chez vous, avec adresse et horaires.", app_ct_t:"Canton", app_ct_p:"Sélectionnez un canton pour obtenir la liste complète des LANDI XL.", show_less:"Afficher moins",
+  why_t:"Pourquoi Agrolandia ?",
+  why_p:"J'aime LANDI pour l'idée qui l'anime : une coopérative née des agriculteurs, liée à la terre, au pays et aux produits locaux. Et j'aime AGROLA, ma station préférée et étape incontournable de mes road trips, pour un café ou une collation de qualité. Agrolandia est née pour celles et ceux qui, comme moi, cherchent dans les LANDI XL un large choix de produits de la terre, pour le travail et pour la maison, et veulent trouver en un clic le plus proche, de préférence avec une AGROLA à côté. Un projet amateur, sans but commercial.",
+  cantoni:{AG:"Argovie",AI:"Appenzell Rhodes-Intérieures",AR:"Appenzell Rhodes-Extérieures",BE:"Berne",BL:"Bâle-Campagne",BS:"Bâle-Ville",FR:"Fribourg",GE:"Genève",GL:"Glaris",GR:"Grisons",JU:"Jura",LU:"Lucerne",NE:"Neuchâtel",NW:"Nidwald",OW:"Obwald",SG:"Saint-Gall",SH:"Schaffhouse",SO:"Soleure",SZ:"Schwytz",TG:"Thurgovie",TI:"Tessin",UR:"Uri",VD:"Vaud",VS:"Valais",ZG:"Zoug",ZH:"Zurich"},
+  cantoni_frase:{AG:"canton d'Argovie",AI:"canton d'Appenzell Rhodes-Intérieures",AR:"canton d'Appenzell Rhodes-Extérieures",BE:"canton de Berne",BL:"canton de Bâle-Campagne",BS:"canton de Bâle-Ville",FR:"canton de Fribourg",GE:"canton de Genève",GL:"canton de Glaris",GR:"canton des Grisons",JU:"canton du Jura",LU:"canton de Lucerne",NE:"canton de Neuchâtel",NW:"canton de Nidwald",OW:"canton d'Obwald",SG:"canton de Saint-Gall",SH:"canton de Schaffhouse",SO:"canton de Soleure",SZ:"canton de Schwytz",TG:"canton de Thurgovie",TI:"canton du Tessin",UR:"canton d'Uri",VD:"canton de Vaud",VS:"canton du Valais",ZG:"canton de Zoug",ZH:"canton de Zurich"},
+ }
+};
+const LOCALE = { it:"it-CH", fr:"fr-CH", de:"de-CH" };
+
+// [cantone, località, negozio, indirizzo, NPA, agrola: "si"|"vicino"|"no", indirizzo TopShop, nota "distanza|altra|oltre|via", lat, lon]
+const NEGOZI = [
+ ["AG","Buchs","LANDI Buchs (AG)","Bresteneggstrasse 9b","5033","no","","",47.3925,8.0805],
+ ["AG","Lenzburg","LANDI Lenzburg","Sägestrasse 10","5600","no","","",47.3890,8.1760],
+ ["AG","Muri","LANDI Muri","Luzernerstrasse 65","5630","vicino","Zürcherstrasse 1, 5630 Muri","1 km",47.2720,8.3390],
+ ["AG","Reinach","LANDI Reinach","Mattenstrasse 10","5734","si","Mattenstrasse 10, 5734 Reinach","",47.2560,8.1830],
+ ["AG","Widen","LANDI Widen","Allmend 5","8967","no","","",47.3660,8.3630],
+ ["BE","Aarberg","LANDI Aarberg","Chräjeninsel 16","3270","no","","",47.0440,7.2760],
+ ["BE","Bellmund","LANDI Bellmund","Keltenstrasse 47","2564","si","Keltenstrasse 47, 2564 Bellmund","",47.1070,7.2450],
+ ["BE","Bern","LANDI Wankdorf","Wankdorffeldstrasse 90","3014","no","","",46.9630,7.4650],
+ ["BE","Herzogenbuchsee","LANDI Herzogenbuchsee","Byfangstrasse 2","3360","si","Byfangstrasse 1, 3360 Herzogenbuchsee","",47.1880,7.7010],
+ ["BE","Lyssach","LANDI Lyssach","Schachenstrasse 39","3421","si","Schachenstrasse 39c, 3421 Lyssach","",47.0660,7.5830],
+ ["BE","Steffisburg","LANDI Steffisburg","Glockentalstrasse 50","3612","si","Glockentalstrasse 50, 3612 Steffisburg","",46.7760,7.6330],
+ ["BE","Zollbrück","LANDI Zollbrück","Dorfstrasse 47","3436","si","Dorfstrasse 47, 3436 Zollbrück","",46.9280,7.7460],
+ ["BL","Aesch","LANDI Aesch","Nordring 2","4147","si","Nordring 2, 4147 Aesch","",47.4740,7.5940],
+ ["BL","Gelterkinden","LANDI Gelterkinden","Sissacherstrasse 40","4460","si","Sissacherstrasse 40, 4460 Gelterkinden","",47.4640,7.8510],
+ ["BL","Laufen","LANDI Laufen","Güterstrasse 27","4242","no","","",47.4210,7.5010],
+ ["FR","Bulle","LANDI Bulle","Route de Riaz 87","1630","si","Route de Riaz 79A, 1630 Bulle","",46.6260,7.0500],
+ ["FR","Marly","LANDI Marly","Route de Chésalles 3","1723","si","Route de Chésalles 3, 1723 Marly","",46.7760,7.1610],
+ ["GR","Landquart","LANDI Landquart","Löserstrasse 11","7302","no","","",46.9650,9.5560],
+ ["JU","Alle","LANDI Alle","Pré-Domont 2","2942","si","Pré-Domont 2, 2942 Alle","",47.4280,7.1270],
+ ["JU","Delémont","LANDI Delémont","Route de Moutier 111","2800","vicino","Route de Moutier 68, 2800 Delémont","150 m|altra|Route de Moutier",47.3650,7.3600],
+ ["LU","Buchrain","LANDI Buchrain","Schiltwaldstrasse 2","6033","si","Schiltwaldstrasse 2, 6033 Buchrain","",47.0960,8.3460],
+ ["LU","Hochdorf","LANDI Hochdorf","Huwilstrasse 7","6280","vicino","Lavendelweg 1, 6280 Hochdorf","200 m|oltre|Huwilstrasse",47.1710,8.2900],
+ ["LU","Malters","LANDI Malters","Mettlenmatte 1","6102","si","Mettlenmatte 1, 6102 Malters","",47.0360,8.1830],
+ ["LU","Reiden","LANDI Reiden","Dörflimatte 1","6260","si","Dörflimatte 1, 6260 Reiden","",47.2450,7.9730],
+ ["NE","Le Crêt-du-Locle","LANDI Le Crêt-du-Locle","Crêt-du-Locle 28","2322","no","","",47.0740,6.7780],
+ ["SG","Altstätten","LANDI Altstätten","Oberrieterstrasse 87","9450","no","","",47.3730,9.5550],
+ ["SG","St. Margrethen","LANDI St. Margrethen","Industriestrasse 43","9430","no","","",47.4520,9.6400],
+ ["SG","Trübbach","LANDI Wartau","Fährhüttenstr. 9","9477","no","","",47.0730,9.4780],
+ ["SH","Schaffhausen","LANDI Schaffhausen","Gennersbrunnerstrasse 65","8207","vicino","Im Majorenacker 17, 8207 Schaffhausen","250 m|altra|Gennersbrunnerstrasse",47.7190,8.6640],
+ ["SO","Grenchen","LANDI Grenchen","Neckarsulmstrasse 50","2540","si","Neckarsulmstrasse 50, 2540 Grenchen","",47.1880,7.3830],
+ ["SO","Lohn-Ammannsegg","LANDI Lohn-Ammannsegg","beim Bahnhof 5","4573","no","","",47.1700,7.5280],
+ ["SO","Wangen bei Olten","LANDI Wangen bei Olten","Dorfstrasse 5","4612","si","Dorfstrasse 5, 4612 Wangen bei Olten","",47.3440,7.8690],
+ ["SZ","Küssnacht am Rigi","LANDI Küssnacht","Zugerstrasse 4","6403","si","Zugerstrasse 4, 6403 Küssnacht","",47.0830,8.4430],
+ ["SZ","Seewen","LANDI Schwyz","Steinbislin 19","6423","no","","",47.0310,8.6330],
+ ["TG","Amriswil","LANDI Amriswil","Schrofenstrasse 20","8580","no","","",47.5480,9.3000],
+ ["UR","Schattdorf","LANDI Schattdorf","Umfahrungsstrasse 24","6467","si","Umfahrungsstrasse 24, 6467 Schattdorf","",46.8620,8.6480],
+ ["VD","Aigle","LANDI Aigle","Ch. de la Biole 2","1860","no","","",46.3120,6.9580],
+ ["VD","Cossonay-Ville","LANDI Cossonay","Route de Dizy 1","1304","si","Route de Dizy 1, 1304 Cossonay","",46.6110,6.5090],
+ ["VD","Lonay","LANDI Lonay","Chemin d'Etraz 1","1027","si","Chemin d'Etraz 1, 1027 Lonay","",46.5240,6.5190],
+ ["VD","Orbe","LANDI Orbe","Chemin de Longeraie 1","1350","no","","",46.7230,6.5380],
+ ["VD","Payerne","LANDI Payerne","Charrière d'Estavayer 21","1530","si","Charrière d'Estavayer 21, 1530 Payerne","",46.8220,6.9370],
+ ["VS","Conthey","LANDI Conthey","Route des Rottes 3","1964","no","","",46.2140,7.3040],
+ ["VS","Saxon","LANDI Saxon","Route du Léman 12","1907","si","Route du Léman 12, 1907 Saxon","",46.1490,7.1720],
+ ["ZH","Adlikon","LANDI Adlikon","Breitestrasse 15","8106","vicino","Pumpwerkstrasse 52, 8105 Regensdorf","350 m|altra|Wehntalerstrasse",47.4410,8.4690],
+ ["ZH","Dürnten","LANDI Dürnten","Kreuzstrasse 10","8635","si","Kreuzstrasse 10, 8635 Dürnten","",47.2780,8.8470],
+ ["ZH","Mönchaltorf","LANDI Mönchaltorf","Mettlenbachstrasse 11","8617","si","Mettlenbachstrasse 11, 8617 Mönchaltorf","",47.3100,8.7210],
+ ["ZH","Neftenbach","LANDI Neftenbach","Zürichstrasse 44","8413","si","Zürichstrasse 44, 8413 Neftenbach","",47.5270,8.6680],
+ ["ZH","Pfäffikon","LANDI Pfäffikon","Kempttalstrasse 90","8330","si","Kempttalstrasse 90, 8330 Pfäffikon","",47.3690,8.7780]
+].map(r => ({ ct:r[0], loc:r[1], nome:r[2], ind:r[3], npa:r[4], agrola:r[5], indTop:r[6], nota:r[7], lat:r[8], lon:r[9],
+  id: r[2].toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"") }));
+
+// Centri dei cantoni (lat, lon)
+const CENTRI = { AG:[47.41,8.16], AI:[47.32,9.42], AR:[47.37,9.30], BE:[46.82,7.62], BL:[47.44,7.76], BS:[47.56,7.60], FR:[46.72,7.07], GE:[46.20,6.14], GL:[46.98,9.07],
+ GR:[46.66,9.63], JU:[47.35,7.15], LU:[47.07,8.11], NE:[47.00,6.80], NW:[46.93,8.40], OW:[46.85,8.25], SG:[47.23,9.27], SH:[47.71,8.59], SO:[47.30,7.64], SZ:[47.06,8.75],
+ TG:[47.57,9.11], TI:[46.30,8.80], UR:[46.77,8.63], VD:[46.57,6.55], VS:[46.21,7.61], ZG:[47.16,8.54], ZH:[47.41,8.65] };
+
+// Tutte le località svizzere con NPA (elenco PLZCH; coordinate GeoNames, CC BY 4.0), caricate da localita-1/2/3.txt.
+// Formato: "#CT" apre un cantone, poi "nome;NPA;lat;lon" con lat = (lat - 45.8) * 1000 e lon = (lon - 5.9) * 1000.
+let LUOGHI = [];
+function leggiLocalita(txt) {
+  const out = []; let ct = "";
+  for (const riga of txt.split("\n")) {
+    if (!riga) continue;
+    if (riga[0] === "#") { ct = riga.slice(1); continue; }
+    const [nome, npa, a, b] = riga.split(";");
+    out.push({ nome, npa, ct, lat: 45.8 + a / 1000, lon: 5.9 + b / 1000 });
+  }
+  return out;
+}
+async function caricaLocalita() {
+  try {
+    const parti = await Promise.all([1, 2, 3].map(async i => {
+      const r = await fetch("localita-" + i + ".txt");
+      if (!r.ok) throw new Error(r.status);
+      return r.text();
+    }));
+    // I file possono arrivare senza "a capo" finale (Wix lo toglie): si uniscono sempre con un a capo
+    LUOGHI = leggiLocalita(parti.join("\n"));
+  } catch (e) {
+    // Senza l'elenco restano cercabili le località dei negozi
+    LUOGHI = NEGOZI.map(n => ({ nome: n.loc, npa: n.npa, ct: n.ct, lat: n.lat, lon: n.lon }));
+  }
+  if (stato.origine) render();
+}
+
+const $ = id => document.getElementById(id);
+const store = {
+  get(k, d) { try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : d; } catch (e) { return d; } },
+  set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} }
+};
+
+/* ---------- Lingua ---------- */
+function linguaIniziale() {
+  const salvata = store.get("agrolandia.lingua", null);
+  if (salvata && TESTI[salvata]) return salvata;
+  const nav = (navigator.languages || [navigator.language || "it"]).map(l => String(l).slice(0, 2).toLowerCase());
+  return nav.find(l => TESTI[l]) || "it";
+}
+let lingua = linguaIniziale();
+const t = (k, v) => { let s = (TESTI[lingua][k] ?? TESTI.it[k] ?? k); if (v) for (const x in v) s = s.split("{" + x + "}").join(v[x]); return s; };
+const nomeCt = k => TESTI[lingua].cantoni[k] || k;
+// Nome del cantone dentro una frase: in francese con la preposizione (canton de Berne, du Tessin, des Grisons…)
+const ctFrase = k => (TESTI[lingua].cantoni_frase || {})[k] || nomeCt(k);
+
+const fmtKm = km => { const s = km < 10 ? km.toFixed(1) : String(Math.round(km)); return lingua === "it" || lingua === "fr" ? s.replace(".", ",") : s; };
+const fmtPrezzo = v => (typeof v === "number" && isFinite(v)) ? v.toFixed(2) : null;
+const fmtData = s => { if (!s) return ""; const d = new Date(s); if (isNaN(d)) return s; try { return d.toLocaleDateString(LOCALE[lingua], { day:"2-digit", month:"2-digit", year:"numeric" }); } catch (e) { return d.toLocaleDateString(); } };
+const fmtOra = d => { try { return d.toLocaleTimeString(LOCALE[lingua], { hour:"2-digit", minute:"2-digit" }); } catch (e) { return d.toLocaleTimeString(); } };
+// Ultima verifica dei prezzi: dal CMS o dal file, altrimenti l'ora in cui la pagina li ha caricati
+const dataVerifica = v => { const d = new Date(v || stato.prezziCaricati || Date.now()); return isNaN(d) ? new Date() : d; };
+const verificaBreve = v => { const d = dataVerifica(v); return fmtData(d.toISOString()).slice(0, 5) + " " + fmtOra(d); };
+const verificaLunga = v => { const d = dataVerifica(v); return fmtData(d.toISOString()) + " " + fmtOra(d); };
+const esc = s => String(s).replace(/[&<>"']/g, c => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" }[c]));
+const norm = s => s.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+  .replace(/\b(sainte|saint|sankt)\b/g, m => m === "sainte" ? "ste" : "st").replace(/[^a-z0-9]/g, "");
+// In francese prima dei due punti va uno spazio
+const duePunti = () => lingua === "fr" ? " : " : ": ";
+function testoNota(n) {
+  if (!n.nota) return "";
+  const [d, tipo, via] = n.nota.split("|");
+  return t("nota_dist", { d }) + (tipo ? t(tipo === "altra" ? "nota_altra" : "nota_oltre", { s: via }) : "");
+}
+
+function applicaLingua() {
+  document.documentElement.lang = lingua;
+  document.querySelectorAll("[data-i18n]").forEach(el => { el.textContent = t(el.dataset.i18n); });
+  $("q").placeholder = t("q_ph");
+  if ($("q2")) $("q2").placeholder = t("q_ph");
+  ["lista-q", "benz-q"].forEach(id => { if ($(id)) $(id).placeholder = t("cerca_ph"); });
+  document.querySelectorAll("[data-i18n-aria]").forEach(el => { el.setAttribute("aria-label", t(el.dataset.i18nAria)); el.title = t(el.dataset.i18nAria); });
+  if ($("btn-lista") && document.documentElement.dataset.lista === "1") $("btn-lista").textContent = t("lista_chiudi");
+  if (typeof renderBenzina === "function" && APP) renderBenzina();
+  $("cantone").setAttribute("aria-label", t("ct_aria"));
+  $("pompa").setAttribute("aria-label", t("pump_aria"));
+  $("lingue").setAttribute("aria-label", t("lang_group"));
+  $("sez-cerca").setAttribute("aria-label", t("search_aria"));
+  $("home").setAttribute("aria-label", t("home_aria"));
+  document.querySelectorAll("#lingue button").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.lang === lingua)));
+  // La lingua scelta va sempre a sinistra, le altre seguono nell'ordine IT, FR, DE
+  const box = $("lingue"), attivo = document.activeElement;
+  [lingua].concat(["it", "fr", "de"].filter(l => l !== lingua)).forEach(l => box.appendChild(box.querySelector('[data-lang="' + l + '"]')));
+  if (attivo && box.contains(attivo)) attivo.focus();
+  riempiCantoni();
+  if (stato.ct) $("f-ct").textContent = t("f_ct", { c: stato.ct });
+  if (!$("err-segnala").hidden) $("err-segnala").textContent = t("err_form");
+  scriviStato();
+  render();
+}
+document.querySelectorAll("#lingue button").forEach(b => b.addEventListener("click", () => {
+  lingua = b.dataset.lang; store.set("agrolandia.lingua", lingua); applicaLingua();
+  if ($("promo-frame") && $("promo-frame").src) $("promo-frame").src = "./?app=1&vetrina=1&lang=" + lingua;
+}));
+
+const distanza = (a, b) => {
+  const R = 6371, rad = x => x * Math.PI / 180;
+  const dLat = rad(b.lat - a.lat), dLon = rad(b.lon - a.lon);
+  const h = Math.sin(dLat/2)**2 + Math.cos(rad(a.lat)) * Math.cos(rad(b.lat)) * Math.sin(dLon/2)**2;
+  return 2 * R * Math.asin(Math.sqrt(h));
+};
+const conAgrola = n => n.agrola === "si" || n.agrola === "vicino";
+const mappa = q => "https://www.google.com/maps/dir/?api=1&destination=" + encodeURIComponent(q);
+// percorso in auto con un tocco (la navigazione la avvia chi guida): coordinate esatte se ci sono, altrimenti l'indirizzo
+const naviga = (v, ind) => "https://www.google.com/maps/dir/?api=1&travelmode=driving&destination=" + encodeURIComponent(typeof v.lat === "number" ? v.lat + "," + v.lon : ind);
+const ICO_NAV = '<svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2 21 21 12 16.5 3 21Z" fill="currentColor"/></svg>';
+
+const stato = { origine: null, filtro: "tutti", ct: null, prezzi: null, prezziCaricati: null, stazione: null, messaggio: null };
+
+/* ---------- Origine ---------- */
+function nomeOrigine(o) {
+  if (o.tipo === "gps") return t("my_pos");
+  if (o.tipo === "cantone") return nomeCt(o.ct);
+  return o.nome;
+}
+function scriviStato() {
+  const el = $("stato"), o = stato.origine;
+  if (stato.messaggio) { el.textContent = t(stato.messaggio.k, stato.messaggio.v); return; }
+  if (!o) { el.textContent = APP ? "" : t("no_pos"); return; }
+  el.innerHTML = esc(t("from")) + " <strong>" + esc(nomeOrigine(o)) + "</strong>" + (o.tipo === "gps" ? esc(t("gps")) : o.tipo === "cantone" ? esc(t("ctr")) : "");
+}
+function messaggio(k, v) { stato.messaggio = { k, v }; scriviStato(); }
+// Nell'app la posizione si memorizza solo se l'utente lo sceglie nelle impostazioni (di base no); sul sito come prima
+const ricorda = () => !APP || store.get("agrolandia.ricorda", false) === true;
+function impostaOrigine(o, salva = true) {
+  stato.origine = o; stato.messaggio = null; stato.elencoAperto = false;
+  if (salva && ricorda()) store.set("agrolandia.origine", o);
+  scriviStato();
+  render();
+  if (APP && salva !== "avvio") setTimeout(() => $("proposte").scrollIntoView({ behavior: "smooth", block: "start" }), 50);
+}
+
+$("btn-pos").addEventListener("click", () => {
+  if (!("geolocation" in navigator)) { messaggio("no_geo"); return; }
+  messaggio("seeking");
+  navigator.geolocation.getCurrentPosition(
+    p => impostaOrigine({ nome: "", lat: p.coords.latitude, lon: p.coords.longitude, tipo: "gps" }),
+    () => messaggio("geo_fail"),
+    { enableHighAccuracy: false, timeout: 10000, maximumAge: 300000 }
+  );
+});
+
+// Cantoni
+function riempiCantoni() {
+  const sel = $("cantone"), val = sel.value;
+  sel.innerHTML = '<option value="">' + esc(t("ct_opt")) + "</option>" + Object.keys(CENTRI).sort().filter(k => !APP || NEGOZI.some(x => x.ct === k)).map(k => {
+    const n = NEGOZI.filter(x => x.ct === k).length;
+    return '<option value="' + k + '">' + k + " · " + esc(nomeCt(k)) + (n ? " (" + n + ")" : "") + "</option>";
+  }).join("");
+  sel.value = val;
+}
+$("cantone").addEventListener("change", () => {
+  const k = $("cantone").value;
+  stato.ct = k || null;
+  $("f-ct").hidden = true; // niente filtro "solo cantone": l'elenco del cantone è già nelle schede sopra
+  if (k) { $("f-ct").textContent = t("f_ct", { c: k }); impostaOrigine({ nome: "", lat: CENTRI[k][0], lon: CENTRI[k][1], tipo: "cantone", ct: k }); }
+  else { if (stato.filtro === "ct") setFiltro("tutti"); render(); }
+});
+
+// Ricerca località
+const q = $("q"), sugg = $("sugg");
+let ricercaTimer = null;
+function cercaLocale(txt) {
+  const m = txt.match(/^\s*(\d{1,4})\s*(.*)$/) || txt.match(/^(.*?)\s+(\d{1,4})\s*$/);
+  let out = [];
+  if (m && /^\d/.test(m[1].trim())) {
+    // NPA (eventualmente seguito dal nome): "6900", "6900 Lug"
+    const npa = m[1].trim(), r = norm(m[2] || "");
+    out = LUOGHI.filter(l => l.npa.startsWith(npa) && (!r || norm(l.nome).startsWith(r))).map(l => [l.npa === npa ? 0 : 1, l]);
+  } else if (m) {
+    // nome seguito dal NPA: "Lugano 6900"
+    const r = norm(m[1]), npa = m[2];
+    out = LUOGHI.filter(l => l.npa.startsWith(npa) && norm(l.nome).startsWith(r)).map(l => [0, l]);
+  } else {
+    const n = norm(txt); if (!n) return [];
+    for (const l of LUOGHI) {
+      const nn = norm(l.nome);
+      if (nn === n) out.push([0, l]);
+      else if (nn.startsWith(n)) out.push([1, l]);
+      else if (nn.includes(n)) out.push([2, l]);
+    }
+  }
+  return out.sort((a, b) => a[0] - b[0] || a[1].nome.localeCompare(b[1].nome) || a[1].npa.localeCompare(b[1].npa)).slice(0, 10).map(x => x[1]);
+}
+async function cercaRete(txt) {
+  // Geocoder pubblico della Confederazione (funziona sul sito pubblicato; se bloccato si usa solo l'elenco interno)
+  try {
+    const url = "https://api3.geo.admin.ch/rest/services/api/SearchServer?type=locations&origins=zipcode,gg25&limit=6&sr=4326&searchText=" + encodeURIComponent(txt);
+    const r = await fetch(url); if (!r.ok) return [];
+    const j = await r.json();
+    return (j.results || []).map(x => ({ nome: x.attrs.label.replace(/<[^>]+>/g, "").trim(), ct: "", npa: "", lat: x.attrs.lat, lon: x.attrs.lon }));
+  } catch (e) { return []; }
+}
+function mostraSugg(lista) {
+  if (!lista.length) { sugg.hidden = true; return; }
+  sugg.innerHTML = lista.map((l, i) => '<li><button type="button" role="option" data-i="' + i + '">' + esc(l.nome) + (l.npa ? ", <strong>" + l.npa + "</strong>" : "") + (l.ct ? " <small>(" + l.ct + ")</small>" : "") + "</button></li>").join("");
+  sugg.hidden = false;
+  sugg.querySelectorAll("button").forEach(b => b.addEventListener("click", () => scegli(lista[+b.dataset.i])));
+}
+function scegli(l) {
+  sugg.hidden = true;
+  const etichetta = l.nome + (l.npa ? ", " + l.npa : "");
+  q.value = etichetta;
+  impostaOrigine({ nome: etichetta, lat: l.lat, lon: l.lon, tipo: "luogo" });
+}
+q.addEventListener("input", () => {
+  const txt = q.value.trim();
+  if (!txt) {
+    sugg.hidden = true; clearTimeout(ricercaTimer);
+    if (APP && stato.origine && stato.origine.tipo === "luogo") { stato.origine = null; stato.messaggio = null; scriviStato(); render(); }
+    return;
+  }
+  const loc = cercaLocale(txt);
+  mostraSugg(loc);
+  clearTimeout(ricercaTimer);
+  if (txt.length >= 3) ricercaTimer = setTimeout(async () => {
+    const rete = await cercaRete(txt);
+    if (q.value.trim() !== txt || !rete.length) return;
+    const nomi = new Set(loc.map(l => norm(l.nome)));
+    mostraSugg(loc.concat(rete.filter(r => !nomi.has(norm(r.nome)))).slice(0, 10));
+  }, 300);
+});
+q.addEventListener("keydown", async e => {
+  if (e.key === "Escape") { sugg.hidden = true; return; }
+  if (e.key !== "Enter") return;
+  e.preventDefault();
+  const txt = q.value.trim(); if (!txt) return;
+  const loc = cercaLocale(txt);
+  // Invio: sceglie da solo solo se il testo indica una località precisa (es. "Lugano" o "Lugano, 6900");
+  // se più località diverse corrispondono (es. "Altdorf": SH e UR), chiede di scegliere dall'elenco
+  if (loc.length) {
+    const esatti = loc.filter(l => norm(l.nome) === norm(txt) || norm(l.nome + l.npa) === norm(txt));
+    if (loc.length === 1) return scegli(loc[0]);
+    if (esatti.length && esatti.every(l => l.nome === esatti[0].nome)) return scegli(esatti[0]);
+    mostraSugg(loc);
+    return messaggio("choose");
+  }
+  const rete = await cercaRete(txt);
+  if (rete.length) return scegli(rete[0]);
+  messaggio("not_found", { t: txt });
+});
+document.addEventListener("click", e => { if (!e.target.closest(".campo")) sugg.hidden = true; });
+
+/* ---------- Prezzi ---------- */
+// Il CMS di Wix si legge solo quando il sito è servito da Wix; altrove (agrolandia.ch su GitHub Pages) bastano i file JSON
+const SU_WIX = /(^|\.)wix-site-host\.com$|(^|\.)wixsite\.com$/.test(location.hostname);
+// I prezzi stanno nel CMS di Wix (raccolta "PrezziCarburante"): una riga con chiave "riferimento"
+// per la media svizzera e, se servono, righe con chiave = id della stazione (es. "landi-reinach").
+// Fuori da Wix (anteprima) si usa il file prezzi.json.
+async function prezziDaWix() {
+  if (!SU_WIX) return null;
+  const { queryItems } = await import("/js/wix/items.js");
+  const page = await queryItems("PrezziCarburante", { limit: 100 });
+  const righe = page.items || [];
+  const valori = r => ({ bleifrei95: r.bleifrei95 ?? null, super98: r.super98 ?? null, diesel: r.diesel ?? null, data: (r.data && r.data.$date) || r.data || null, fonte: r.fonte || "", affidabilita: r.affidabilita || "", verificato: (r._updatedDate && r._updatedDate.$date) || r._updatedDate || null });
+  const rif = righe.find(r => r.chiave === "riferimento");
+  const stazioni = {};
+  righe.filter(r => r.chiave && r.chiave !== "riferimento").forEach(r => { stazioni[r.chiave] = valori(r); });
+  if (!rif && !Object.keys(stazioni).length) return null;
+  return { aggiornato: rif ? rif.data : null, riferimento: rif ? Object.assign(valori(rif), { etichetta: rif.etichetta || "" }) : null, stazioni };
+}
+async function caricaPrezzi() {
+  let p = null;
+  try { p = await prezziDaWix(); } catch (e) { p = null; }
+  if (!p) {
+    try {
+      const r = await fetch("prezzi.json?t=" + Date.now(), { cache: "no-store" });
+      if (r.ok) p = await r.json();
+    } catch (e) { /* resta l'ultimo dato caricato */ }
+  }
+  const prima = JSON.stringify(stato.prezzi && stato.prezzi.stazioni);
+  if (p) { stato.prezzi = p; stato.prezziCaricati = new Date(); }
+  if (p && JSON.stringify(p.stazioni) !== prima) render(); else renderPompa();
+}
+function prezziPer(n) {
+  const mie = store.get("agrolandia.segnalazioni", {})[n.id];
+  if (mie) return { v: mie, data: mie.data, tipo: "mio" };
+  const p = stato.prezzi;
+  const s = p && p.stazioni && p.stazioni[n.id];
+  if (s && (s.bleifrei95 || s.super98 || s.diesel)) return { v: s, fonte: s.fonte || "prezzi.json", data: s.data || p.aggiornato, tipo: "stazione" };
+  if (p && p.riferimento) return { v: p.riferimento, fonte: p.riferimento.fonte || "", data: p.riferimento.data, tipo: "media" };
+  return null;
+}
+function lcd(id, v) {
+  const el = $(id), s = fmtPrezzo(v);
+  el.textContent = s || "-.--";
+  el.classList.toggle("vuoto", !s);
+}
+// Tab "Benzina" dell'app: tutti gli AGROLA TopShop della Svizzera (topshop.json: elenco, orari da agrola.ch,
+// posizione e prezzi dal TCS); con la sua barra di ricerca mostra i 3 più vicini
+let TOPSHOP = null;
+// topshop_dati.json: {m: modelli di orario "06:00-22:00|...", t: [id, carwash, via, NPA, località, cantone, telefono, lat, lon, modello, speciali, colonnine 24h]}
+// topshop_prezzi.json: {v: verificato, p: {id: [95, 98, diesel, affidabilità C/F/O/X]}}
+async function caricaTopshop() {
+  if (!APP) return;
+  try {
+    const leggi = async f => { const r = await fetch(f + "?t=" + Date.now(), { cache: "no-store" }); return r.ok ? r.json() : null; };
+    const [dati, prezzi] = await Promise.all([leggi("topshop_dati.json"), leggi("topshop_prezzi.json").catch(() => null)]);
+    if (!dati) return;
+    const giorno = g => g === "-" ? null : g ? g.split(",").map(f => f.split("-")) : [];
+    const AFF = { C: "CONFIDENT", F: "FEW_RECENT_PRICES", O: "OLD_LAST_UPDATE", X: "OUTDATED_LAST_PRICE_UPDATE" };
+    const P = (prezzi && prezzi.p) || {};
+    TOPSHOP = dati.t.map(([id, cw, via, npa, loc, ct, tel, lat, lon, m, spec, p24]) => ({
+      id, nome: cw ? "AGROLA TopShop & CarWash" : "AGROLA TopShop", via, npa, loc, ct, tel, lat, lon, pompa24: !!p24,
+      settimana: dati.m[m].split("|").map(giorno), speciali: (spec || []).map(([data, g]) => ({ data, orari: giorno(g) || [], nota: "" })),
+      prezzi: P[id] ? { bleifrei95: P[id][0], super98: P[id][1], diesel: P[id][2], affidabilita: AFF[P[id][3]] || "", verificato: prezzi.v } : null
+    }));
+    stato.orariTop = Object.fromEntries(TOPSHOP.map(v => [v.id, v]));
+    renderBenzina();
+  } catch (e) {}
+}
+function posTopshop(v) {
+  if (typeof v.lat === "number") return v;
+  const l = LUOGHI.find(x => x.npa === v.npa);
+  return l ? { lat: l.lat, lon: l.lon } : null;
+}
+function renderBenzina() {
+  const box = $("benz-ris");
+  if (!APP || !box) return;
+  const o = stato.origineAg;
+  if (!TOPSHOP) { box.innerHTML = '<div class="nota-card">…</div>'; return; }
+  const q = $("benz-q").value.trim();
+  const vicini = TOPSHOP.filter(v => corrisponde([v.nome, v.via, v.npa, v.loc, v.ct, nomeCt(v.ct)].join(" "), q))
+    .map(v => { const p = posTopshop(v); return { v, km: o && p ? distanza(o, p) : null }; })
+    .sort((a, b) => a.km !== null && b.km !== null ? a.km - b.km : a.v.ct.localeCompare(b.v.ct) || a.v.loc.localeCompare(b.v.loc, "de"));
+  if (o && !q) vicini.splice(3);
+  $("benz-conta").textContent = vicini.length === 1 ? t("n_ris1") : t("n_ris", { n: vicini.length });
+  if (!vicini.length) { box.innerHTML = '<div class="nota-card">' + esc(t("nessuno")) + "</div>"; return; }
+  box.innerHTML = (o ? '<p class="stato">' + esc(t("from")) + " <strong>" + esc(nomeOrigine(o)) + "</strong></p>" : "") + vicini.map(({ v, km }) => {
+    const ind = v.via + ", " + v.npa + " " + v.loc;
+    return '<article class="card sec" id="ts-' + esc(v.id) + '"><div class="testa"><h3 class="nome">' + esc(v.nome || "AGROLA TopShop") + " " + esc(v.loc) + "</h3>" + (km === null ? "" : '<div class="km">' + fmtKm(km) + " km<small>" + esc(t("air")) + "</small></div>") + "</div>" +
+      "<p>" + esc(ind) + (v.tel ? ' · <a href="tel:' + esc(v.tel.replace(/\s/g, "")) + '">' + esc(v.tel) + "</a>" : "") + "</p>" +
+      '<a class="btn primario btn-naviga" href="' + naviga(v, "AGROLA TopShop " + ind) + '" target="_blank" rel="noopener">' + ICO_NAV + "<span>" + esc(t("nav_ag")) + "</span></a>" +
+      (lcdPrezzi(v.prezzi && Object.assign({ data: v.prezzi.verificato }, v.prezzi)) || '<div class="nota-card">' + esc(t("benz_nd")) + "</div>") +
+      orariHtml({ id: v.id }, "topshop") + "</article>";
+  }).join("");
+}
+// barra di ricerca del tab Benzina (stesse località e NPA della ricerca LANDI)
+function origineAg(o) { stato.origineAg = o; renderBenzina(); }
+if (APP) {
+  const q2 = $("q2"), sugg2 = $("sugg2");
+  const scegli2 = l => { sugg2.hidden = true; q2.value = l.nome + (l.npa ? ", " + l.npa : ""); origineAg({ nome: q2.value, lat: l.lat, lon: l.lon, tipo: "luogo" }); };
+  const mostra2 = lista => {
+    if (!lista.length) { sugg2.hidden = true; return; }
+    sugg2.innerHTML = lista.map((l, i) => '<li><button type="button" role="option" data-i="' + i + '">' + esc(l.nome) + (l.npa ? ", <strong>" + l.npa + "</strong>" : "") + (l.ct ? " <small>(" + l.ct + ")</small>" : "") + "</button></li>").join("");
+    sugg2.hidden = false;
+    sugg2.querySelectorAll("button").forEach(b => b.addEventListener("click", () => scegli2(lista[+b.dataset.i])));
+  };
+  q2.addEventListener("input", () => {
+    const txt = q2.value.trim();
+    if (!txt) { sugg2.hidden = true; if (stato.origineAg) origineAg(null); return; }
+    mostra2(cercaLocale(txt));
+  });
+  q2.addEventListener("keydown", e => {
+    if (e.key === "Escape") { sugg2.hidden = true; return; }
+    if (e.key !== "Enter") return;
+    e.preventDefault();
+    const l = cercaLocale(q2.value.trim());
+    if (l.length) scegli2(l[0]);
+  });
+  $("btn-pos2").addEventListener("click", () => {
+    if (!("geolocation" in navigator)) return;
+    navigator.geolocation.getCurrentPosition(p => { q2.value = ""; origineAg({ nome: "", lat: p.coords.latitude, lon: p.coords.longitude, tipo: "gps" }); }, () => {}, { enableHighAccuracy: false, timeout: 10000, maximumAge: 300000 });
+  });
+  // vetrina: i 3 TopShop più vicini a Berna, con prezzi e percorso
+  if (document.documentElement.classList.contains("vetrina")) { q2.value = "Bern, 3011"; stato.origineAg = { nome: q2.value, lat: 46.948, lon: 7.4474, tipo: "luogo" }; }
+  caricaTopshop();
+}
+function renderPompa() {
+  renderBenzina();
+  if (APP && document.documentElement.dataset.lista === "1") renderLista();
+  const n = stato.stazione;
+  if (!n) {
+    const r = stato.prezzi && stato.prezzi.riferimento, v = r || {};
+    $("lcd-st").textContent = t("lcd_ch");
+    lcd("lcd-95", v.bleifrei95); lcd("lcd-98", v.super98); lcd("lcd-d", v.diesel);
+    const ver0 = r && r.verificato;
+    $("lcd-agg").innerHTML = '<span class="blink">●</span> ' + esc(r ? fmtData(r.data) : t("lcd_nodata")) + "<br>" + esc(t("lcd_upd")) + " " + esc(verificaLunga(ver0));
+    $("fonte-prezzi").textContent = r ? t("src_ch", { s: r.fonte || "", d: fmtData(r.data), v: verificaLunga(ver0) }) : t("src_none");
+    $("btn-segnala").hidden = true; form.hidden = true;
+    return;
+  }
+  $("btn-segnala").hidden = false;
+  const info = prezziPer(n);
+  $("lcd-st").textContent = "AGROLA " + n.loc;
+  const v = info ? info.v : {};
+  lcd("lcd-95", v.bleifrei95); lcd("lcd-98", v.super98); lcd("lcd-d", v.diesel);
+  const ver = info ? (info.tipo === "mio" ? info.data : info.v.verificato) : null;
+  const etich = info ? (info.tipo === "media" ? t("lcd_avg") + " " : info.tipo === "mio" ? t("lcd_mine") + " " : "") + fmtData(info.data) : t("lcd_nodata");
+  $("lcd-agg").innerHTML = '<span class="blink">●</span> ' + esc(etich) + "<br>" + esc(t("lcd_upd")) + " " + esc(verificaLunga(ver));
+  $("fonte-prezzi").textContent = !info ? t("src_none")
+    : info.tipo === "media" ? t("src_avg", { s: info.fonte, d: fmtData(info.data), v: verificaLunga(ver) })
+    : info.tipo === "mio" ? t("src_mine", { d: fmtData(info.data) })
+    : t("src_station", { s: info.fonte, d: fmtData(info.data), v: verificaLunga(ver) });
+  $("segnala-titolo").textContent = t("form_title", { l: n.loc });
+}
+setInterval(caricaPrezzi, 5 * 60 * 1000);
+document.addEventListener("visibilitychange", () => { if (!document.hidden) caricaPrezzi(); });
+
+// Segnalazione manuale
+const form = $("form-segnala");
+$("btn-segnala").addEventListener("click", () => {
+  form.hidden = !form.hidden;
+  if (!form.hidden && stato.stazione) {
+    const info = prezziPer(stato.stazione);
+    const v = info && info.tipo !== "media" ? info.v : {};
+    $("in-95").value = v.bleifrei95 || ""; $("in-98").value = v.super98 || ""; $("in-d").value = v.diesel || "";
+    $("in-95").focus();
+  }
+});
+$("btn-annulla").addEventListener("click", () => { form.hidden = true; $("err-segnala").hidden = true; });
+form.addEventListener("submit", e => {
+  e.preventDefault();
+  const leggi = id => { const s = $(id).value.trim().replace(",", "."); return s ? parseFloat(s) : null; };
+  const vals = { bleifrei95: leggi("in-95"), super98: leggi("in-98"), diesel: leggi("in-d") };
+  const err = $("err-segnala");
+  const bad = Object.values(vals).some(x => x !== null && (!isFinite(x) || x < 1 || x > 4));
+  if (bad || Object.values(vals).every(x => x === null)) { err.textContent = t("err_form"); err.hidden = false; return; }
+  err.hidden = true;
+  const tutte = store.get("agrolandia.segnalazioni", {});
+  tutte[stato.stazione.id] = Object.assign(vals, { data: new Date().toISOString() });
+  store.set("agrolandia.segnalazioni", tutte);
+  form.hidden = true;
+  renderPompa();
+});
+
+/* ---------- Proposte e elenco ---------- */
+// Sigla del cantone: sfondo e scritta presi dai colori della bandiera
+const BANDIERE = {
+ AG:["#1F5FA8","#fff"], AI:["#1B1B1B","#fff"], AR:["#fff","#1B1B1B"], BE:["#D0231B","#FFD100"], BL:["#fff","#D0231B"],
+ BS:["#fff","#1B1B1B"], FR:["#1B1B1B","#fff"], GE:["#FFD100","#D0231B"], GL:["#D0231B","#fff"], GR:["#1F5FA8","#fff"],
+ JU:["#D0231B","#fff"], LU:["#1F5FA8","#fff"], NE:["#00843D","#fff"], NW:["#D0231B","#fff"], OW:["#D0231B","#fff"],
+ SG:["#00843D","#fff"], SH:["#FFD100","#1B1B1B"], SO:["#D0231B","#fff"], SZ:["#D0231B","#fff"], TG:["#00843D","#fff"],
+ TI:["#D0231B","#fff"], UR:["#FFD100","#1B1B1B"], VD:["#00843D","#fff"], VS:["#D0231B","#fff"], ZG:["#1F5FA8","#fff"], ZH:["#1F5FA8","#fff"]
+};
+function chipCt(ct, link) {
+  const b = BANDIERE[ct] || ["#1B2220", "#fff"];
+  const stile = '" style="background:' + b[0] + ";color:" + b[1] + '">' + ct;
+  // Nelle schede la sigla è un tasto: mostra tutti i LANDI XL del cantone
+  if (link) return '<button type="button" class="chip ct vai-ct" data-ct="' + ct + '" title="' + esc(t("ct_list", { c: ctFrase(ct) })) + stile + " ›</button>";
+  return '<span class="chip ct" title="' + esc(nomeCt(ct)) + stile + "</span>";
+}
+document.addEventListener("click", e => {
+  const b = e.target.closest(".vai-ct");
+  if (!b) return;
+  $("cantone").value = b.dataset.ct;
+  $("cantone").dispatchEvent(new Event("change"));
+  $("proposte").scrollIntoView({ behavior: "smooth", block: "start" });
+});
+
+/* ---------- Orari dei negozi (fonte: landi.ch) ----------
+   Nel CMS Wix (raccolta "OrariNegozi": chiave = id negozio, settimana e speciali come JSON);
+   fuori da Wix dal file orari.json. settimana = 7 giorni da lunedì, ognuno una lista di [apre, chiude];
+   speciali = [{ data: "AAAA-MM-GG", orari: [[apre, chiude]], nota }], lista vuota = chiuso. */
+async function orariDaWix() {
+  if (!SU_WIX) return null;
+  const { queryItems } = await import("/js/wix/items.js");
+  const page = await queryItems("OrariNegozi", { limit: 100 });
+  const out = {};
+  (page.items || []).forEach(r => {
+    try { out[r.chiave] = { url: r.url || "", settimana: JSON.parse(r.settimana || "[]"), speciali: JSON.parse(r.speciali || "[]") }; } catch (e) {}
+  });
+  return Object.keys(out).length ? out : null;
+}
+async function caricaOrari() {
+  let o = null;
+  try { o = await orariDaWix(); } catch (e) { o = null; }
+  if (!o) {
+    try { const r = await fetch("orari.json?t=" + Date.now(), { cache: "no-store" }); if (r.ok) o = await r.json(); } catch (e) {}
+  }
+  if (o) { stato.orari = o; render(); }
+}
+/* Orari AGROLA (TopShop accanto al LANDI; fonte: agrola.ch). Nel CMS Wix raccolta "OrariAgrola", fuori da Wix agrola_orari.json.
+   Stesso formato degli orari LANDI, più pompa24 = colonnine aperte 24 ore su 24. */
+async function orariAgrolaDaWix() {
+  if (!SU_WIX) return null;
+  const { queryItems } = await import("/js/wix/items.js");
+  const page = await queryItems("OrariAgrola", { limit: 100 });
+  const out = {};
+  (page.items || []).forEach(r => {
+    try { out[r.chiave] = { url: r.url || "", settimana: JSON.parse(r.settimana || "[]"), speciali: JSON.parse(r.speciali || "[]"), pompa24: !!r.pompa24 }; } catch (e) {}
+  });
+  return Object.keys(out).length ? out : null;
+}
+async function caricaOrariAgrola() {
+  let o = null;
+  try { o = await orariAgrolaDaWix(); } catch (e) { o = null; }
+  if (!o) {
+    try { const r = await fetch("agrola_orari.json?t=" + Date.now(), { cache: "no-store" }); if (r.ok) o = await r.json(); } catch (e) {}
+  }
+  if (o) { stato.orariAgrola = o; render(); }
+}
+// Data, giorno e ora attuali in Svizzera
+function adessoCH() {
+  const parti = new Intl.DateTimeFormat("en-CA", { timeZone: "Europe/Zurich", year: "numeric", month: "2-digit", day: "2-digit",
+    hour: "2-digit", minute: "2-digit", hour12: false, weekday: "short" }).formatToParts(new Date());
+  const g = k => (parti.find(p => p.type === k) || {}).value;
+  return { data: g("year") + "-" + g("month") + "-" + g("day"), ora: g("hour").replace(/^24/, "00") + ":" + g("minute"),
+    giorno: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"].indexOf(g("weekday")) };
+}
+const fasce = lista => lista == null ? "—" : lista.length ? lista.map(f => f[0] + "–" + f[1]).join(", ") : t("chiuso");
+// Orari del giorno di una data (gli orari speciali hanno la precedenza)
+function orariDel(o, data, giorno) {
+  const spec = (o.speciali || []).find(x => x.data === data);
+  return { fasce: spec ? spec.orari : (o.settimana[giorno] || []), spec };
+}
+const apertoOra = o => { const a = adessoCH(); return orariDel(o, a.data, a.giorno).fasce.some(f => a.ora >= f[0] && a.ora < f[1]); };
+// Quando riapre: primo orario di apertura dopo adesso, entro due settimane
+function quandoRiapre(o) {
+  const a = adessoCH();
+  const base = new Date(a.data + "T12:00:00Z");
+  for (let k = 0; k < 14; k++) {
+    const d = new Date(base.getTime() + k * 864e5);
+    const data = d.toISOString().slice(0, 10), giorno = (d.getUTCDay() + 6) % 7;
+    const f = orariDel(o, data, giorno).fasce.map(x => x[0]).sort().find(h => k > 0 || h > a.ora);
+    if (f) return { k, giorno, h: f };
+  }
+  return null;
+}
+function orariHtml(n, tipo) {
+  const ag = tipo === "agrola" || tipo === "topshop";
+  const fonte = tipo === "topshop" ? stato.orariTop : ag ? stato.orariAgrola : stato.orari;
+  const o = fonte && fonte[n.id];
+  if (!o) return !ag && fonte ? '<div class="orari-oggi nd">' + esc(t("orari_nd")) + "</div>" : "";
+  const ora = adessoCH();
+  const { fasce: oggi, spec } = orariDel(o, ora.data, ora.giorno);
+  const aperto = apertoOra(o);
+  let testo = esc(t("oggi")) + ": " + esc(fasce(oggi)) + (spec && spec.nota ? " (" + esc(spec.nota) + ")" : "");
+  if (!aperto) {
+    const r = quandoRiapre(o);
+    if (r) testo = esc(t("riapre", { g: r.k === 0 ? t("oggi").toLowerCase() : r.k === 1 ? t("domani") : t("giorni")[r.giorno].toLowerCase(), h: r.h }));
+  }
+  const righe = t("giorni").map((g, i) => '<tr' + (i === ora.giorno ? ' class="oggi"' : "") + "><th>" + esc(g) + "</th><td>" + esc(fasce(o.settimana[i])) + "</td></tr>").join("");
+  const prossimi = (o.speciali || []).filter(x => x.data >= ora.data).slice(0, 6)
+    .map(x => "<li><b>" + esc(fmtData(x.data + "T12:00:00")) + "</b> " + esc(fasce(x.orari)) + (x.nota ? " · " + esc(x.nota) : "") + "</li>").join("");
+  return '<details class="orari' + (ag ? " ag" : "") + '"><summary><span class="lbl-orari">' + esc(t(ag ? "lbl_agrola" : "lbl_landi")) + "</span><span>" + testo + "</span>" +
+    '<span class="stato-ap ' + (aperto ? "si" : "no") + '">' + esc(t(aperto ? "aperto_ora" : "chiuso_ora")) + "</span></summary>" +
+    '<table class="settimana">' + righe + "</table>" +
+    (ag && o.pompa24 ? '<div class="speciali">⛽ ' + esc(t("pompa24")) + "</div>" : "") +
+    (prossimi ? '<div class="speciali"><b>' + esc(t("orari_speciali")) + "</b><ul>" + prossimi + "</ul></div>" : "") +
+    (o.url ? '<a class="fonte-orari" href="' + esc(o.url) + '" target="_blank" rel="noopener">' + (ag ? "agrola.ch" : "landi.ch") + "</a>" : "") + "</details>" +
+    (!ag && !aperto ? apertiVicino(n) : "");
+}
+// LANDI XL chiuso: tasto con i LANDI XL più vicini aperti adesso (nome e cantone, link a Maps)
+function apertiVicino(n) {
+  if (!stato.orari) return "";
+  const da = stato.origine || n;
+  const aperti = NEGOZI.filter(x => x !== n && stato.orari[x.id] && apertoOra(stato.orari[x.id]))
+    .map(x => ({ x, km: distanza(da, x) })).sort((a, b) => a.km - b.km).slice(0, 3);
+  if (!aperti.length) return "";
+  return '<details class="aperti"><summary>' + esc(t("aperti_vicino")) + "</summary><ul>" +
+    aperti.map(({ x }) => '<li><a href="' + mappa(x.nome + ", " + x.ind + ", " + x.npa + " " + x.loc) + '" target="_blank" rel="noopener">' + esc(x.nome) + " (" + x.ct + ")</a></li>").join("") +
+    "</ul></details>";
+}
+
+// Pagine ufficiali: LANDI (landi.ch/places) e cercatore stazioni AGROLA
+const SLUG_LANDI = { "landi-buchs-ag": "landi-buchs-(ag)-wynecenter", "landi-st-margrethen": "landi-st-margrethen-laveba-landi-ag",
+  "landi-le-cret-du-locle": "landi-le-cr%C3%AAt-du-locle" };
+function urlLandi(n) {
+  const base = n.nome.toLowerCase().replace(/ä/g, "ae").replace(/ö/g, "oe").replace(/ü/g, "ue")
+    .normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+  return "https://www.landi.ch/places/" + (lingua === "fr" ? "fr" : "de") + "/" + (SLUG_LANDI[base] || base);
+}
+
+function card(n, km, tipo, num, ctP) {
+  const etichetta = n.agrola === "si" ? '<span class="chip si">' + esc(t("chip_si")) + "</span>"
+    : n.agrola === "vicino" ? '<span class="chip vicino">' + esc(t("chip_vicino")) + "</span>" : '<span class="chip no">' + esc(t("chip_no")) + "</span>";
+  const eyebrow = tipo === "agrola" ? '<span class="eyebrow">' + esc(t("eyebrow1")) + "</span>" : "";
+  const nota = n.agrola === "vicino" ? '<div class="nota-card">' + esc(testoNota(n)) + duePunti() + esc(n.indTop) + "</div>" : "";
+  const destAgrola = n.agrola !== "no" && n.indTop ? '<a class="dir-ag" href="' + mappa("AGROLA TopShop " + n.indTop) + '" target="_blank" rel="noopener">' + esc(t("dir_agrola")) + "</a>" : "";
+  return '<article class="card' + (tipo === "agrola" ? " top1" : " sec") + '">' + eyebrow +
+    '<div class="testa"><h3 class="nome">' + esc(n.nome) + "</h3>" + (km === null ? "" : '<div class="km">' + fmtKm(km) + " km<small>" + esc(t("air")) + "</small></div>") + "</div>" +
+    "<p>" + esc(n.ind) + ", " + esc(n.npa) + " " + esc(n.loc) + "</p>" +
+    '<a class="btn primario btn-naviga" href="' + naviga({}, n.nome + ", " + n.ind + ", " + n.npa + " " + n.loc) + '" target="_blank" rel="noopener">' + ICO_NAV + "<span>" + esc(t("nav_ag")) + "</span></a>" +
+    // nell'app (tab LANDI) per i LANDI XL con AGROLA basta questa etichetta, senza dettagli
+    (conAgrola(n) ? '<button type="button" class="chip si chip-app vai-ag" data-id="' + esc(n.id) + '">' + esc(t("m_si")) + " ›</button>" : "") + orariHtml(n) + orariHtml(n, "agrola") +
+    // prezzi AGROLA nelle altre proposte; per la proposta n. 1 stanno sulla pompa (sul cellulare, dove la pompa non c'è, anche qui)
+    (tipo !== "agrola" ? miniLcd(n) : miniLcd(n, "solo-mob")) +
+    '<div class="etichette">' + chipCt(n.ct, true) + etichetta + "</div>" + nota +
+    '<div class="link-row"><a href="' + mappa(n.nome + ", " + n.ind + ", " + n.npa + " " + n.loc) + '" target="_blank" rel="noopener">' + esc(t("dir_landi")) + "</a>" + destAgrola + "</div>" +
+    '<div class="link-row"><a class="ufficiale" href="' + urlLandi(n) + '" target="_blank" rel="noopener">' + esc(t("page_landi")) + "</a>" + "</div></article>";
+}
+
+// Cantone del punto di partenza: quello scelto, altrimenti quello della località più vicina
+function cantoneDi(o) {
+  if (o.ct) return o.ct;
+  if (!LUOGHI.length) return null;
+  let best = null, dMin = Infinity;
+  for (const l of LUOGHI) { const d = distanza(o, l); if (d < dMin) { dMin = d; best = l; } }
+  return best ? best.ct : null;
+}
+
+// Sito senza posizione (reset): niente proposte, l'elenco prende subito il loro posto accanto alla pompa
+const sezHero = document.querySelector(".hero"), sezElenco = document.querySelector(".elenco");
+function modoReset(si) {
+  if (APP) { $("proposte").hidden = false; return; }
+  $("qr-app").hidden = !si;
+  $("promo-app").hidden = !si;
+  if (si && $("promo-app").parentNode !== sezHero) sezHero.appendChild($("promo-app"));
+  if (si && !$("promo-frame").src && matchMedia("(min-width: 1180px)").matches) $("promo-frame").src = "./?app=1&vetrina=1&lang=" + lingua;
+  if (si && $("qr-app").parentNode !== sezHero) sezHero.appendChild($("qr-app"));
+  $("proposte").hidden = si;
+  // senza posizione la pompa non serve: compare solo con le proposte, per mostrarne i prezzi
+  sezHero.classList.toggle("reset", si);
+  sezElenco.classList.toggle("in-hero", si);
+  if (si && sezElenco.parentNode !== sezHero) sezHero.appendChild(sezElenco);
+  if (!si && sezElenco.parentNode === sezHero) sezHero.after(sezElenco);
+}
+function render() {
+  const o = stato.origine;
+  modoReset(!o);
+  // elenco dei LANDI XL di un cantone: niente pompa (i prezzi stanno nei display delle schede)
+  sezHero.classList.toggle("cantone", !!o && o.tipo === "cantone");
+  if (!o) {
+    $("proposte").innerHTML = "";
+    stato.stazione = null;
+    renderPompa();
+    // in ordine alfabetico per cantone, poi per nome
+    renderElenco(NEGOZI.map(n => ({ n, km: null })).sort((a, b) => a.n.ct.localeCompare(b.n.ct) || a.n.nome.localeCompare(b.n.nome, "de")));
+    return;
+  }
+  const lista = NEGOZI.map(n => ({ n, km: distanza(o, n) })).sort((a, b) => a.km - b.km);
+  // Cantone scelto dal menu: tutti i LANDI XL del cantone, senza distanze, schede tutte uguali:
+  // prima quelli con AGROLA, poi gli altri, in ordine alfabetico.
+  // Cantone senza AGROLA: prima i suoi LANDI XL, sotto (sezione a parte) il LANDI XL con AGROLA più vicino;
+  // cantone senza LANDI XL: quello, più un LANDI XL senza AGROLA se è ancora più vicino.
+  if (o.tipo === "cantone") {
+    const alfa = (a, b) => a.nome.localeCompare(b.nome, "de");
+    const delCt = NEGOZI.filter(n => n.ct === o.ct);
+    const agCt = delCt.filter(conAgrola).sort(alfa), altriCt = delCt.filter(n => !conAgrola(n)).sort(alfa);
+    const pAg = lista.find(x => conAgrola(x.n)).n;
+    let schede, nota = "", fuori = null;
+    if (agCt.length) schede = agCt.concat(altriCt);
+    else if (delCt.length) { schede = altriCt; fuori = pAg; }
+    else {
+      const piuVicino = lista[0].n !== pAg ? lista[0].n : null;
+      schede = piuVicino ? [pAg, piuVicino] : [pAg];
+      nota = t(piuVicino ? "ct_none2" : "ct_none", { c: ctFrase(o.ct) });
+    }
+    const html = "<h2>" + esc(delCt.length ? t("ct_list", { c: ctFrase(o.ct) }) : t("proposals")) + "</h2>" +
+      (nota ? '<div class="nota-card">' + esc(nota) + "</div>" : "") + schede.map(n => card(n, delCt.length ? null : distanza(o, n), "prop")).join("") +
+      (fuori ? '<h3 class="altri-titolo">' + esc(t("ct_ag_fuori")) + "</h3>" + card(fuori, null, "prop") : "");
+    stato.stazione = schede.find(conAgrola) || fuori;
+    $("proposte").innerHTML = html;
+    renderPompa();
+    // distanze solo se il cantone non ha LANDI XL (si propone quello più vicino)
+    renderElenco(delCt.length ? lista.map(x => ({ n: x.n, km: null })) : lista);
+    return;
+  }
+  // Sempre tre proposte. Priorità: AGROLA del proprio cantone, AGROLA di un altro cantone,
+  // LANDI XL del proprio cantone, LANDI XL di un altro cantone.
+  const ctP = cantoneDi(o);
+  const nelCt = x => !!ctP && x.n.ct === ctP;
+  // 1) la AGROLA più vicina del proprio cantone; se non c'è, la AGROLA più vicina di un altro cantone
+  const p1 = lista.find(x => conAgrola(x.n) && nelCt(x)) || lista.find(x => conAgrola(x.n));
+  const scelte = [p1];
+  // 2-3) i LANDI XL più vicini del proprio cantone (con o senza AGROLA)
+  lista.filter(x => nelCt(x) && !scelte.includes(x)).slice(0, 2).forEach(x => scelte.push(x));
+  // se non bastano, i più vicini di un altro cantone
+  lista.filter(x => !scelte.includes(x)).slice(0, 3 - scelte.length).forEach(x => scelte.push(x));
+  // La proposta 1 sta da sola in evidenza; la 2 e la 3 sotto, in un riquadro più sobrio
+  let html = "<h2>" + esc(t("proposals")) + "</h2>" + card(p1.n, p1.km, "agrola", 1, ctP);
+  if (scelte.length > 1) html += '<h3 class="altri-titolo">' + esc(t("more_props")) + "</h3>" + scelte.slice(1).map((x, i) => card(x.n, x.km, "prop", i + 2, ctP)).join("");
+  $("proposte").innerHTML = html;
+
+  stato.stazione = p1.n;
+  renderPompa();
+  renderElenco(lista);
+}
+
+// Prezzi della stazione AGROLA (TCS) nell'elenco, con lo stesso stile dello schermo della pompa.
+// Solo nelle righe dell'elenco: nelle proposte i prezzi stanno sulla pompa.
+function miniLcd(n, classe) {
+  const s = stato.prezzi && stato.prezzi.stazioni && stato.prezzi.stazioni[n.id];
+  if (!conAgrola(n)) return "";
+  return lcdPrezzi(s, classe);
+}
+function lcdPrezzi(s, classe) {
+  if (!s || !(s.bleifrei95 || s.super98 || s.diesel)) return "";
+  const cifra = v => { const f = fmtPrezzo(v); return "<b" + (f ? "" : ' class="vuoto"') + ">" + (f || "-.--") + "</b>"; };
+  return '<div class="mini-lcd' + (classe ? " " + classe : "") + '"><span>95</span>' + cifra(s.bleifrei95) + "<span>98</span>" + cifra(s.super98) + "<span>D</span>" + cifra(s.diesel) +
+    "<small>" + esc(t("lcd_tcs", { d: fmtData(s.verificato || s.data) }) + (s.affidabilita && t("affid")[s.affidabilita] ? " · " + t("affid")[s.affidabilita] : "")) + "</small></div>";
+}
+function renderElenco(lista) {
+  const filtro = APP ? "agrola" : stato.filtro;
+  if (APP) $("t-elenco").textContent = t("tab_prezzi");
+  const righe = lista.filter(x => filtro === "agrola" ? conAgrola(x.n) : filtro === "ct" ? x.n.ct === stato.ct : true);
+  $("righe").innerHTML = righe.map(({ n, km }) => {
+    // Computer: Sì / Vicino / No. Cellulare: testo esteso; "AGROLA nelle vicinanze" si apre con
+    // dove si trova la stazione e i suoi orari (che sul cellulare stanno solo lì)
+    const ag = n.agrola === "si" ? '<span class="chip si solo-desk">' + esc(t("yes")) + '</span><span class="chip si solo-mob">' + esc(t("m_si")) + "</span>"
+      : n.agrola === "vicino" ? '<span class="solo-desk"><span class="chip vicino">' + esc(t("near")) + '</span><span class="sub">' + esc(testoNota(n)) +
+        ' · <a href="' + mappa("AGROLA TopShop " + n.indTop) + '" target="_blank" rel="noopener">' + esc(t("map")) + "</a></span></span>" +
+        '<details class="ag-vicino solo-mob"><summary><span class="chip vicino">' + esc(t("m_vicino")) + " ▾</span></summary>" +
+        '<p class="sub">' + esc(testoNota(n)) + (testoNota(n) ? duePunti() : "") + esc(n.indTop) +
+        ' · <a href="' + mappa("AGROLA TopShop " + n.indTop) + '" target="_blank" rel="noopener">' + esc(t("map")) + "</a></p>" + orariHtml(n, "agrola") + "</details>"
+      : '<span class="chip no solo-desk">' + esc(t("no")) + '</span><span class="chip no solo-mob">' + esc(t("m_no")) + "</span>";
+    const orariAg = orariHtml(n, "agrola");
+    const orariAgNome = n.agrola === "vicino" && orariAg ? '<div class="solo-desk">' + orariAg + "</div>" : orariAg;
+    return '<tr><td class="c-nome"><strong><a href="' + urlLandi(n) + '" target="_blank" rel="noopener">' + esc(n.nome) + '</a></strong><span class="sub">' + esc(n.ind) + ", " + esc(n.npa) + " " + esc(n.loc) +
+      ' · <a href="' + mappa(n.nome + ", " + n.ind + ", " + n.npa + " " + n.loc) + '" target="_blank" rel="noopener">' + esc(t("map")) + "</a></span>" + orariHtml(n) + orariAgNome + "</td>" +
+      '<td class="c-ct">' + chipCt(n.ct) + '</td><td class="c-agrola">' + ag + miniLcd(n) + '</td><td class="num">' + (km === null ? "—" : fmtKm(km) + " km") + "</td></tr>";
+  }).join("") || '<tr><td colspan="4">' + esc(t("empty_filter")) + "</td></tr>";
+  requestAnimationFrame(chiudiElenco);
+  // stato aperto/chiuso di riferimento per il controllo di ogni minuto
+  stato.firma = stato.orari ? firmaOrari() : "";
+}
+
+// Elenco chiuso: si vedono bene i primi 2, la sfumatura parte dalla fine del 2° e finisce col 3°;
+// sulla sfumatura il tasto "Mostra tutto" apre l'elenco intero
+function chiudiElenco() {
+  const box = document.querySelector(".tabella-box"), btn = $("mostra-tutto");
+  const righe = $("righe").children;
+  box.classList.remove("chiusa"); box.style.maxHeight = "";
+  if (APP || righe.length <= 3) { btn.hidden = true; return; }
+  // lo stesso tasto: "Mostra tutto" sulla sfumatura, "Mostra meno" sotto l'elenco aperto
+  btn.hidden = false;
+  btn.textContent = t(stato.elencoAperto ? "show_less" : "show_all");
+  btn.classList.toggle("meno", !!stato.elencoAperto);
+  if (stato.elencoAperto) return;
+  const top = box.getBoundingClientRect().top;
+  const fine = righe[2].getBoundingClientRect().bottom - top;
+  box.style.setProperty("--sfuma", Math.round(righe[1].getBoundingClientRect().bottom - top) + "px");
+  box.style.maxHeight = Math.round(fine) + "px";
+  box.classList.add("chiusa");
+  btn.hidden = false;
+}
+$("mostra-tutto").addEventListener("click", () => {
+  stato.elencoAperto = !stato.elencoAperto;
+  chiudiElenco();
+  // richiudendo si torna all'inizio dell'elenco
+  if (!stato.elencoAperto) document.querySelector(".elenco").scrollIntoView({ behavior: "smooth", block: "start" });
+});
+window.addEventListener("resize", () => requestAnimationFrame(chiudiElenco));
+// aprire gli orari di una riga cambia l'altezza: si ricalcola
+document.addEventListener("toggle", e => { if (!stato.elencoAperto && $("righe").contains(e.target)) chiudiElenco(); }, true);
+
+function setFiltro(f) {
+  stato.filtro = f;
+  [["tutti", "f-tutti"], ["agrola", "f-agrola"], ["ct", "f-ct"]].forEach(([k, id]) => $(id).setAttribute("aria-pressed", String(k === f)));
+  render();
+}
+$("f-tutti").addEventListener("click", () => setFiltro("tutti"));
+$("f-agrola").addEventListener("click", () => setFiltro("agrola"));
+$("f-ct").addEventListener("click", () => setFiltro("ct"));
+
+/* ---------- Avvio ---------- */
+const salvata = store.get("agrolandia.origine", null);
+stato.origine = (ricorda() && salvata && typeof salvata.lat === "number" && salvata.tipo !== "esempio") ? salvata : null;
+if (stato.origine && stato.origine.tipo === "cantone") { stato.ct = stato.origine.ct; }
+if (APP && stato.origine && stato.origine.tipo === "luogo") q.value = stato.origine.nome;
+
+// Service worker minimo: rende l'app installabile come app completa (non salva niente sul telefono)
+if ("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js").catch(() => {});
+
+// ---------- Invito a installare l'app ----------
+// QR verso l'app (https://agrolandia.ch/?app=1), generato una volta e salvato qui riga per riga in esadecimale;
+// al centro il logo dell'app. Da rigenerare se cambia l'indirizzo del sito (dominio).
+const QR_APP = "fe1efabf8,821e0ea08,bab7ffae8,baefd52e8,ba0d15ae8,82688b208,feaaaabf8,004d5a800,1b4f18860,9c839d5a0,efa483538,1110d67f0,f32214bd8,34e1ad5d0,535d08760,51d210b28,6e4009390,51699abd8,12b0c5678,35d979a78,6ed620d50,f495c27e0,877004b98,ac36da0b0,ffaf40f90,00b8538d0,fef86fa80,8260408f0,baf00dfd0,babe7c570,ba4eca0b8,826932038,fe4ba1ca0";
+function disegnaQr() {
+  const righe = QR_APP.split(","), n = righe.length, q = 4, L = 11, c = (n - L) / 2;
+  let d = "";
+  righe.forEach((h, y) => {
+    const bit = [...h].map(x => parseInt(x, 16).toString(2).padStart(4, "0")).join("").slice(0, n);
+    for (let x = 0; x < n;) {
+      if (bit[x] !== "1") { x++; continue; }
+      let l = 1; while (x + l < n && bit[x + l] === "1") l++;
+      d += "M" + x + " " + y + "h" + l + "v1h-" + l + "z"; x += l;
+    }
+  });
+  $("qr-img").innerHTML = $("qr-img2").innerHTML = '<svg viewBox="' + -q + " " + -q + " " + (n + 2 * q) + " " + (n + 2 * q) + '" role="img" aria-label="QR Agrolandia app">' +
+    '<rect x="' + -q + '" y="' + -q + '" width="' + (n + 2 * q) + '" height="' + (n + 2 * q) + '" fill="#fff"/><path d="' + d + '" fill="#1B2220"/>' +
+    '<rect x="' + (c - 1) + '" y="' + (c - 1) + '" width="' + (L + 2) + '" height="' + (L + 2) + '" rx="1.5" fill="#fff"/>' +
+    '<svg x="' + c + '" y="' + c + '" width="' + L + '" height="' + L + '" viewBox="0 0 32 32"><rect width="32" height="32" rx="5" fill="#00843D"/><path d="M0 22 C9 15 21 13 32 15 L32 21 C21 19 10 21 0 28 Z" fill="#FFD100"/></svg></svg>';
+}
+if (!APP) disegnaQr();
+// Banner sul cellulare (non nell'app già installata); chiuso, non ricompare per 30 giorni
+let promptInstalla = null;
+window.addEventListener("beforeinstallprompt", e => { e.preventDefault(); promptInstalla = e; });
+window.addEventListener("appinstalled", () => { $("banner-app").hidden = true; document.body.classList.remove("con-banner"); });
+(() => {
+  if (APP) return;
+  const chiuso = store.get("agrolandia.banner", 0);
+  if (chiuso && Date.now() - chiuso < 30 * 864e5) return;
+  $("banner-app").hidden = false;
+  document.body.classList.add("con-banner");
+  $("ban-x").addEventListener("click", () => { $("banner-app").hidden = true; document.body.classList.remove("con-banner"); store.set("agrolandia.banner", Date.now()); });
+  $("ban-btn").addEventListener("click", async () => {
+    if (promptInstalla) { promptInstalla.prompt(); try { await promptInstalla.userChoice; } catch (e) {} promptInstalla = null; return; }
+    const ios = /iphone|ipad|ipod/i.test(navigator.userAgent);
+    $("ban-p").removeAttribute("data-i18n");
+    $("ban-p").textContent = t(ios ? "ban_ios" : "ban_and");
+  });
+})();
+
+// ---------- Modalità app: tab ----------
+function vaiTab(tab) {
+  if (!APP) return;
+  document.documentElement.dataset.tab = tab;
+  document.querySelectorAll("#tab-app button").forEach(b => b.setAttribute("aria-current", b.dataset.tab === tab ? "page" : "false"));
+  window.scrollTo({ top: 0 });
+}
+document.querySelectorAll("#tab-app button").forEach(b => b.addEventListener("click", () => vaiTab(b.dataset.tab)));
+// "con AGROLA" sulle schede LANDI: porta al tab AGROLA sulla TopShop corrispondente (stesso NPA e via, altrimenti la più vicina)
+document.addEventListener("click", e => {
+  const b = e.target.closest(".vai-ag"); if (!b || !APP) return;
+  const n = NEGOZI.find(x => x.id === b.dataset.id); if (!n) return;
+  let ts = null;
+  if (TOPSHOP) {
+    const ind = n.indTop || (n.ind + ", " + n.npa), npa = (ind.match(/\b\d{4}\b/) || [n.npa])[0];
+    const via = norm(ind.split(",")[0]).replace(/\d.*$/, "").slice(0, 8);
+    const stessi = TOPSHOP.filter(v => v.npa === npa);
+    ts = stessi.find(v => via && norm(v.via).includes(via)) || (stessi.length === 1 ? stessi[0] : null);
+    if (!ts) { const vic = TOPSHOP.map(v => ({ v, p: posTopshop(v) })).filter(x => x.p).map(x => ({ v: x.v, km: distanza(n, x.p) })).sort((a, c) => a.km - c.km)[0]; if (vic && vic.km < 3) ts = vic.v; }
+  }
+  $("q2").value = n.nome; $("sugg2").hidden = true;
+  if ($("benz-q").value) { $("benz-q").value = ""; $("benz-q").hidden = true; $("benz-lente").setAttribute("aria-pressed", "false"); }
+  stato.origineAg = { nome: n.nome, lat: (ts && posTopshop(ts) || n).lat, lon: (ts && posTopshop(ts) || n).lon, tipo: "luogo" };
+  renderBenzina();
+  vaiTab("benzina");
+  const el = ts && $("ts-" + ts.id);
+  if (el) { el.classList.add("evidenzia"); setTimeout(() => el.scrollIntoView({ behavior: "smooth", block: "center" }), 60); }
+});
+// Ricerca a mano nelle liste dell'app (nome, via, NPA, località, cantone)
+const corrisponde = (testo, q) => !q || norm(testo).includes(norm(q));
+function lente(btnId, inputId, ridisegna) {
+  $(btnId).addEventListener("click", () => {
+    const aperta = $(inputId).hidden;
+    $(inputId).hidden = !aperta; $(btnId).setAttribute("aria-pressed", String(aperta));
+    if (aperta) $(inputId).focus(); else { $(inputId).value = ""; ridisegna(); }
+  });
+  $(inputId).addEventListener("input", ridisegna);
+}
+// Tab LANDI XL: lista completa (filtro "con AGROLA" e lente)
+function renderLista() {
+  if (!APP) return;
+  const o = stato.origine, q = $("lista-q").value.trim(), soloAg = $("lista-ag").getAttribute("aria-pressed") === "true";
+  let l = NEGOZI.filter(n => (!soloAg || conAgrola(n)) && corrisponde([n.nome, n.ind, n.npa, n.loc, n.ct, nomeCt(n.ct)].join(" "), q))
+    .map(n => ({ n, km: o ? distanza(o, n) : null }));
+  l.sort((a, b) => a.km !== null ? a.km - b.km : a.n.ct.localeCompare(b.n.ct) || a.n.nome.localeCompare(b.n.nome, "de"));
+  $("lista-conta").textContent = l.length === 1 ? t("n_ris1") : t("n_ris", { n: l.length });
+  $("lista-ris").innerHTML = l.length ? l.map(({ n, km }) => card(n, km, "prop")).join("") : '<div class="nota-card">' + esc(t("nessuno")) + "</div>";
+}
+if (APP) {
+  $("btn-lista").addEventListener("click", () => {
+    const aperta = document.documentElement.dataset.lista !== "1";
+    document.documentElement.dataset.lista = aperta ? "1" : "";
+    $("btn-lista").setAttribute("aria-pressed", String(aperta));
+    $("btn-lista").textContent = t(aperta ? "lista_chiudi" : "lista_btn");
+    if (aperta) { renderLista(); $("app-lista").scrollIntoView({ behavior: "smooth", block: "start" }); }
+  });
+  $("lista-ag").addEventListener("click", () => { $("lista-ag").setAttribute("aria-pressed", String($("lista-ag").getAttribute("aria-pressed") !== "true")); renderLista(); });
+  lente("lista-lente", "lista-q", renderLista);
+  lente("benz-lente", "benz-q", () => renderBenzina());
+  // Azzera: chiude la ricerca e torna alla lista completa
+  const chiudiLente = (btn, inp) => { $(inp).value = ""; $(inp).hidden = true; $(btn).setAttribute("aria-pressed", "false"); };
+  $("benz-azzera").addEventListener("click", () => {
+    $("q2").value = ""; $("sugg2").hidden = true; stato.origineAg = null; chiudiLente("benz-lente", "benz-q");
+    renderBenzina(); window.scrollTo({ top: 0, behavior: "smooth" });
+  });
+  $("lista-azzera").addEventListener("click", () => {
+    $("lista-ag").setAttribute("aria-pressed", "false"); chiudiLente("lista-lente", "lista-q");
+    renderLista(); $("app-lista").scrollIntoView({ behavior: "smooth", block: "start" });
+  });
+  // Tema: automatico (come il telefono), chiaro o scuro
+  const segnaTema = () => { const v = store.get("agrolandia.tema", "auto"); document.querySelectorAll("#tema button").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.tema === v))); };
+  document.querySelectorAll("#tema button").forEach(b => b.addEventListener("click", () => {
+    const v = b.dataset.tema;
+    store.set("agrolandia.tema", v);
+    if (v === "auto") delete document.documentElement.dataset.theme; else document.documentElement.dataset.theme = v;
+    segnaTema();
+  }));
+  segnaTema();
+  $("ricorda").checked = ricorda();
+  $("ricorda").addEventListener("change", () => {
+    store.set("agrolandia.ricorda", $("ricorda").checked);
+    store.set("agrolandia.origine", $("ricorda").checked && stato.origine ? stato.origine : null);
+  });
+}
+if (APP) {
+  // primo tab: sopra località/posizione, sotto (separato) il cantone; la lingua va nelle impostazioni
+  $("app-blocco-pos").append(document.querySelector(".riga-cerca .campo"), $("btn-pos"));
+  $("app-blocco-ct").append($("cantone"));
+  $("app-blocco-ct").after($("stato"));
+  $("app-lingua").append($("lingue"));
+  vaiTab("benzina");
+}
+
+// Logo e titolo: ricomincia da capo, senza posizione
+$("home").addEventListener("click", () => {
+  store.set("agrolandia.origine", null);
+  stato.origine = null; stato.ct = null; stato.messaggio = null; stato.filtro = "tutti"; stato.elencoAperto = false;
+  q.value = ""; sugg.hidden = true; $("cantone").value = "";
+  $("f-ct").hidden = true; form.hidden = true; $("err-segnala").hidden = true;
+  ["f-tutti", "f-agrola", "f-ct"].forEach((id, i) => $(id).setAttribute("aria-pressed", String(i === 0)));
+  window.scrollTo({ top: 0, behavior: "smooth" });
+  if (APP) { $("q2").value = ""; $("sugg2").hidden = true; stato.origineAg = null; renderBenzina(); }
+  applicaLingua();
+  vaiTab(APP ? "benzina" : "cerca");
+});
+applicaLingua();
+caricaPrezzi();
+caricaLocalita();
+caricaOrari();
+caricaOrariAgrola();
+// Testata: si nasconde scorrendo in basso, ricompare appena si risale (per reset e lingue a portata di mano)
+(() => {
+  const testata = document.querySelector(".top");
+  let ultimo = window.scrollY, attesa = false;
+  window.addEventListener("scroll", () => {
+    if (attesa) return;
+    attesa = true;
+    requestAnimationFrame(() => {
+      const y = window.scrollY;
+      if (y < testata.offsetHeight || y < ultimo - 4) testata.classList.remove("nascosta");
+      else if (y > ultimo + 4) testata.classList.add("nascosta");
+      ultimo = y; attesa = false;
+    });
+  }, { passive: true });
+})();
+// Ogni minuto (e quando si torna sulla pagina) si controlla se un negozio ha aperto o chiuso:
+// solo in quel caso la pagina si ridisegna, così gli orari aperti non si chiudono senza motivo
+function firmaOrari() {
+  return NEGOZI.map(n => [stato.orari, stato.orariAgrola].map(f => f && f[n.id] ? (apertoOra(f[n.id]) ? 1 : 0) : "-").join("")).join("");
+}
+function controllaAperture() {
+  if (document.hidden) return;
+  if (stato.firma && firmaOrari() !== stato.firma) render();
+}
+setInterval(controllaAperture, 60000);
+document.addEventListener("visibilitychange", controllaAperture);
+</script>
