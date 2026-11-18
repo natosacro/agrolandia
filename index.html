@@ -1021,9 +1021,8 @@ q.addEventListener("keydown", async e => {
 document.addEventListener("click", e => { if (!e.target.closest(".campo")) sugg.hidden = true; });
 
 /* ---------- Prezzi ---------- */
-// Prezzi e orari arrivano sempre dai file JSON (aggiornati ogni giorno da GitHub Actions e copiati anche sulla copia Wix);
-// il CMS di Wix non si legge più
-const SU_WIX = false;
+// Il CMS di Wix si legge solo quando il sito è servito da Wix; altrove (agrolandia.ch su GitHub Pages) bastano i file JSON
+const SU_WIX = /(^|\.)wix-site-host\.com$|(^|\.)wixsite\.com$/.test(location.hostname);
 // I prezzi stanno nel CMS di Wix (raccolta "PrezziCarburante"): una riga con chiave "riferimento"
 // per la media svizzera e, se servono, righe con chiave = id della stazione (es. "landi-reinach").
 // Fuori da Wix (anteprima) si usa il file prezzi.json.
