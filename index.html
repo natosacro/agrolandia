@@ -1393,6 +1393,12 @@ function render() {
     renderElenco(delCt.length ? lista.map(x => ({ n: x.n, km: null })) : lista);
     return;
   }
+  // App: come nel tab AGROLA, solo i 3 LANDI XL più vicini, dal più vicino al più lontano, schede tutte uguali
+  if (APP) {
+    $("proposte").innerHTML = lista.slice(0, 3).map(x => card(x.n, x.km, "prop")).join("");
+    stato.stazione = null;
+    return;
+  }
   // Sempre tre proposte. Priorità: AGROLA del proprio cantone, AGROLA di un altro cantone,
   // LANDI XL del proprio cantone, LANDI XL di un altro cantone.
   const ctP = cantoneDi(o);
