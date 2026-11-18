@@ -276,6 +276,8 @@ html.app .btn-naviga { display: flex; width: 100%; min-height: 48px; margin: 10p
 html.app .btn-naviga svg { transform: rotate(45deg); }
 .contatto { margin-top: 18px; padding-top: 12px; border-top: 1px solid var(--riga); }
 .contatto a { font-weight: 600; white-space: nowrap; }
+html.app .landi-barra { margin-top: 14px; }
+html.app .landi-barra[hidden] { display: none; }
 html.app .interruttore { display: flex; align-items: center; gap: 10px; font-weight: 600; cursor: pointer; }
 html.app .interruttore input { width: 22px; height: 22px; accent-color: var(--verde); }
 html.app .app-ris { display: grid; gap: 12px; }
@@ -420,6 +422,7 @@ footer p { margin: 0 0 6px; max-width: 65ch; }
     <div class="app-blocco" id="app-blocco-ct">
       <p class="app-spiega"><b data-i18n="app_ct_t">Cantone</b> <span data-i18n="app_ct_p"></span></p>
     </div>
+    <div class="landi-barra" id="landi-barra" hidden></div>
     <button type="button" class="btn app-btn-lista" id="btn-lista" aria-pressed="false" data-i18n="lista_btn">Lista completa dei LANDI XL in Svizzera</button>
   </section>
   <section class="wrap app-sez" id="app-lista">
@@ -1383,8 +1386,11 @@ document.addEventListener("click", e => {
   scriviStato(); render();
   window.scrollTo({ top: 0, behavior: "smooth" });
 });
+// la barra sta sotto il box del cantone, sopra il tasto della lista completa
+function mostraBarra(n) { const el = $("landi-barra"); if (!el) return; el.hidden = !n; el.innerHTML = n ? barraLandi(n) : ""; }
 function render() {
   const o = stato.origine;
+  if (!o) mostraBarra(0);
   modoReset(!o);
   // elenco dei LANDI XL di un cantone: niente pompa (i prezzi stanno nei display delle schede)
   sezHero.classList.toggle("cantone", !!o && o.tipo === "cantone");
@@ -1418,7 +1424,8 @@ function render() {
       (nota ? '<div class="nota-card">' + esc(nota) + "</div>" : "") + schede.map(n => card(n, delCt.length ? null : distanza(o, n), "prop")).join("") +
       (fuori ? '<h3 class="altri-titolo">' + esc(t("ct_ag_fuori")) + "</h3>" + card(fuori, null, "prop") : "");
     stato.stazione = schede.find(conAgrola) || fuori;
-    $("proposte").innerHTML = (APP ? barraLandi(schede.length + (fuori ? 1 : 0)) : "") + html;
+    if (APP) mostraBarra(schede.length + (fuori ? 1 : 0));
+    $("proposte").innerHTML = html;
     renderPompa();
     // distanze solo se il cantone non ha LANDI XL (si propone quello più vicino)
     renderElenco(delCt.length ? lista.map(x => ({ n: x.n, km: null })) : lista);
@@ -1426,7 +1433,8 @@ function render() {
   }
   // App: come nel tab AGROLA, solo i 3 LANDI XL più vicini, dal più vicino al più lontano, schede tutte uguali
   if (APP) {
-    $("proposte").innerHTML = barraLandi(3) + lista.slice(0, 3).map(x => card(x.n, x.km, "prop")).join("");
+    mostraBarra(3);
+    $("proposte").innerHTML = lista.slice(0, 3).map(x => card(x.n, x.km, "prop")).join("");
     stato.stazione = null;
     return;
   }
