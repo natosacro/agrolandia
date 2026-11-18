@@ -1066,8 +1066,9 @@ function renderBenzina() {
   const o = stato.origineAg;
   if (!TOPSHOP) { box.innerHTML = '<div class="nota-card">…</div>'; return; }
   const q = $("benz-q").value.trim();
-  const vicini = TOPSHOP.filter(v => corrisponde([v.nome, v.via, v.npa, v.loc, v.ct, nomeCt(v.ct)].join(" "), q))
-    .map(v => { const p = posTopshop(v); return { v, km: o && p ? distanza(o, p) : null }; })
+  // arrivando da "con AGROLA" di un LANDI XL si mostra solo la TopShop corrispondente
+  const vicini = TOPSHOP.filter(v => (!stato.soloTs || v.id === stato.soloTs) && corrisponde([v.nome, v.via, v.npa, v.loc, v.ct, nomeCt(v.ct)].join(" "), q))
+    .map(v => { const p = posTopshop(v); return { v, km: o && p && !stato.soloTs ? distanza(o, p) : null }; })
     .sort((a, b) => a.km !== null && b.km !== null ? a.km - b.km : a.v.ct.localeCompare(b.v.ct) || a.v.loc.localeCompare(b.v.loc, "de"));
   if (o && !q) vicini.splice(3);
   $("benz-conta").textContent = vicini.length === 1 ? t("n_ris1") : t("n_ris", { n: vicini.length });
@@ -1082,7 +1083,7 @@ function renderBenzina() {
   }).join("");
 }
 // barra di ricerca del tab Benzina (stesse località e NPA della ricerca LANDI)
-function origineAg(o) { stato.origineAg = o; renderBenzina(); }
+function origineAg(o) { stato.origineAg = o; stato.soloTs = null; renderBenzina(); }
 if (APP) {
   const q2 = $("q2"), sugg2 = $("sugg2");
   const scegli2 = l => { sugg2.hidden = true; q2.value = l.nome + (l.npa ? ", " + l.npa : ""); origineAg({ nome: q2.value, lat: l.lat, lon: l.lon, tipo: "luogo" }); };
@@ -1578,6 +1579,7 @@ document.addEventListener("click", e => {
   }
   $("q2").value = n.nome; $("sugg2").hidden = true;
   if ($("benz-q").value) { $("benz-q").value = ""; $("benz-q").hidden = true; $("benz-lente").setAttribute("aria-pressed", "false"); }
+  stato.soloTs = ts ? ts.id : null;
   stato.origineAg = { nome: n.nome, lat: (ts && posTopshop(ts) || n).lat, lon: (ts && posTopshop(ts) || n).lon, tipo: "luogo" };
   renderBenzina();
   vaiTab("benzina");
@@ -1618,7 +1620,7 @@ if (APP) {
   // Azzera: chiude la ricerca e torna alla lista completa
   const chiudiLente = (btn, inp) => { $(inp).value = ""; $(inp).hidden = true; $(btn).setAttribute("aria-pressed", "false"); };
   $("benz-azzera").addEventListener("click", () => {
-    $("q2").value = ""; $("sugg2").hidden = true; stato.origineAg = null; chiudiLente("benz-lente", "benz-q");
+    $("q2").value = ""; $("sugg2").hidden = true; stato.origineAg = null; stato.soloTs = null; chiudiLente("benz-lente", "benz-q");
     renderBenzina(); window.scrollTo({ top: 0, behavior: "smooth" });
   });
   $("lista-azzera").addEventListener("click", () => {
@@ -1657,7 +1659,7 @@ $("home").addEventListener("click", () => {
   $("f-ct").hidden = true; form.hidden = true; $("err-segnala").hidden = true;
   ["f-tutti", "f-agrola", "f-ct"].forEach((id, i) => $(id).setAttribute("aria-pressed", String(i === 0)));
   window.scrollTo({ top: 0, behavior: "smooth" });
-  if (APP) { $("q2").value = ""; $("sugg2").hidden = true; stato.origineAg = null; renderBenzina(); }
+  if (APP) { $("q2").value = ""; $("sugg2").hidden = true; stato.origineAg = null; stato.soloTs = null; renderBenzina(); }
   applicaLingua();
   vaiTab(APP ? "benzina" : "cerca");
 });
