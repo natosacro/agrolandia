@@ -1380,12 +1380,21 @@ const ICO_AZZERA = '<svg viewBox="0 0 24 24" width="20" height="20" aria-hidden=
 const barraLandi = n => '<div class="app-barra"><span class="app-conta">' + esc(n === 1 ? t("n_ris1") : t("n_ris", { n })) + '</span><button type="button" class="btn lente" id="landi-azzera" aria-label="' + esc(t("azzera")) + '" title="' + esc(t("azzera")) + '">' + ICO_AZZERA + "</button></div>";
 document.addEventListener("click", e => {
   if (!e.target.closest("#landi-azzera")) return;
+  azzeraTutto();
+});
+// Azzera insieme il tab LANDI XL (località, posizione, cantone) e il tab AGROLA (località, TopShop scelta, ricerca)
+function azzeraTutto() {
   stato.origine = null; stato.ct = null; stato.messaggio = null;
   store.set("agrolandia.origine", null);
   q.value = ""; sugg.hidden = true; $("cantone").value = "";
   scriviStato(); render();
+  if (APP) {
+    $("q2").value = ""; $("sugg2").hidden = true; stato.origineAg = null; stato.soloTs = null;
+    $("benz-q").value = ""; $("benz-q").hidden = true; $("benz-lente").setAttribute("aria-pressed", "false");
+    renderBenzina();
+  }
   window.scrollTo({ top: 0, behavior: "smooth" });
-});
+}
 // la barra sta sotto il box del cantone, sopra il tasto della lista completa
 function mostraBarra(n) { const el = $("landi-barra"); if (!el) return; el.hidden = !n; el.innerHTML = n ? barraLandi(n) : ""; }
 function render() {
@@ -1669,10 +1678,7 @@ if (APP) {
   lente("benz-lente", "benz-q", () => renderBenzina());
   // Azzera: chiude la ricerca e torna alla lista completa
   const chiudiLente = (btn, inp) => { $(inp).value = ""; $(inp).hidden = true; $(btn).setAttribute("aria-pressed", "false"); };
-  $("benz-azzera").addEventListener("click", () => {
-    $("q2").value = ""; $("sugg2").hidden = true; stato.origineAg = null; stato.soloTs = null; chiudiLente("benz-lente", "benz-q");
-    renderBenzina(); window.scrollTo({ top: 0, behavior: "smooth" });
-  });
+  $("benz-azzera").addEventListener("click", azzeraTutto);
   $("lista-azzera").addEventListener("click", () => {
     $("lista-ag").setAttribute("aria-pressed", "false"); chiudiLente("lista-lente", "lista-q");
     renderLista(); $("app-lista").scrollIntoView({ behavior: "smooth", block: "start" });
