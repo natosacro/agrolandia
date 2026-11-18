@@ -205,20 +205,15 @@ select.btn { padding-right: 10px; }
 /* ---------- Invito a installare l'app: QR (computer, schermata iniziale) e banner (cellulare) ---------- */
 .qr-app { display: flex; align-items: center; gap: 18px; margin-top: 16px; padding: 14px 16px; background: var(--carta); border: 1px solid var(--riga); border-left: 4px solid var(--verde); border-radius: 10px; max-width: 34rem; }
 .qr-app[hidden] { display: none; }
-/* schermata iniziale (computer): il QR sta a destra della lista, un po' più in basso dell'inizio, e segue lo scorrimento */
-@media (min-width: 601px) {
-  .hero.reset:has(.qr-app:not([hidden])) { grid-template-columns: minmax(0, 1fr) 200px; }
-  .hero.reset .elenco { grid-column: 1; grid-row: 1; }
-  .hero.reset .qr-app { grid-column: 2; grid-row: 1; align-self: start; flex-direction: column; align-items: center; text-align: center; gap: 10px; max-width: none; margin-top: 140px; position: sticky; top: 84px; padding: 14px 12px; border-left: 1px solid var(--riga); border-top: 4px solid var(--verde); }
-  .hero.reset .qr-app .qr-img svg { width: 150px; height: 150px; }
-}
-/* banner dell'app a sinistra della lista (schermata iniziale, schermi larghi) */
+/* computer: il QR grande sta nel piè di pagina */
+footer .qr-app { margin-top: 22px; }
+footer .qr-app .qr-img svg { width: 150px; height: 150px; }
+/* banner dell'app a destra della lista (schermata iniziale, schermi larghi); segue lo scorrimento */
 .promo-app { display: none; }
 @media (min-width: 1180px) {
-  .hero.reset:has(.promo-app:not([hidden])) { max-width: 86rem; grid-template-columns: 236px minmax(0, 1fr) 200px; }
-  .hero.reset:has(.promo-app:not([hidden])) .elenco { grid-column: 2; }
-  .hero.reset:has(.promo-app:not([hidden])) .qr-app { grid-column: 3; }
-  .hero.reset .promo-app:not([hidden]) { display: grid; gap: 12px; grid-column: 1; grid-row: 1; align-self: start; position: sticky; top: 84px; margin-top: 64px; padding: 16px 14px; background: var(--barra); color: var(--barra-testo); border-radius: 14px; }
+  .hero.reset:has(.promo-app:not([hidden])) { grid-template-columns: minmax(0, 1fr) 236px; }
+  .hero.reset:has(.promo-app:not([hidden])) .elenco { grid-column: 1; grid-row: 1; }
+  .hero.reset .promo-app:not([hidden]) { display: grid; gap: 12px; grid-column: 2; grid-row: 1; align-self: start; position: sticky; top: 84px; margin-top: 64px; padding: 16px 14px; background: var(--barra); color: var(--barra-testo); border-radius: 14px; }
 }
 .promo-tel { width: 208px; height: 412px; justify-self: center; overflow: hidden; border: 7px solid #1B2220; border-radius: 26px; background: #F2F3EF; box-shadow: 0 8px 22px rgba(0,0,0,.22); }
 .promo-tel iframe { width: 390px; height: 772px; border: 0; transform: scale(.5); transform-origin: 0 0; pointer-events: none; }
@@ -1364,11 +1359,12 @@ function cantoneDi(o) {
 const sezHero = document.querySelector(".hero"), sezElenco = document.querySelector(".elenco");
 function modoReset(si) {
   if (APP) { $("proposte").hidden = false; return; }
-  $("qr-app").hidden = !si;
+  // QR grande nel piè di pagina (sempre, sul computer); banner dell'app accanto alla lista solo nella schermata iniziale
+  if ($("qr-app").parentNode !== document.querySelector("footer .wrap")) document.querySelector("footer .wrap").appendChild($("qr-app"));
+  $("qr-app").hidden = false;
   $("promo-app").hidden = !si;
   if (si && $("promo-app").parentNode !== sezHero) sezHero.appendChild($("promo-app"));
   if (si && !$("promo-frame").src && matchMedia("(min-width: 1180px)").matches) $("promo-frame").src = "./?app=1&vetrina=1&lang=" + lingua;
-  if (si && $("qr-app").parentNode !== sezHero) sezHero.appendChild($("qr-app"));
   $("proposte").hidden = si;
   // senza posizione la pompa non serve: compare solo con le proposte, per mostrarne i prezzi
   sezHero.classList.toggle("reset", si);
