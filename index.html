@@ -194,12 +194,16 @@ select.btn { padding-right: 10px; }
 }
 .mini-lcd.solo-mob { display: none; }
 .tcs-mob { display: none; padding-block: 4px 22px; text-align: center; }
+/* cellulare: tasto verde nel piè di pagina per scaricare l'app */
+.scarica-mob { display: none; margin: 14px 0 4px; text-align: center; }
+.scarica-mob .btn { width: 100%; justify-content: center; background: var(--verde); border-color: var(--verde); color: var(--giallo); font: 700 1.05rem/1 var(--display); letter-spacing: .06em; text-transform: uppercase; }
 .tcs-mob .btn { font-size: .9rem; }
 @media (max-width: 600px) {
   .mini-lcd.solo-mob { display: inline-grid; }
   /* sul cellulare niente pompa: i prezzi sono nei display delle proposte */
   .hero .pompa-box { display: none !important; }
   .tcs-mob { display: block; }
+  .scarica-mob { display: block; }
 }
 .mini-lcd small { grid-column: 1 / -1; max-width: 16em; margin-top: 2px; font-size: .6rem; line-height: 1.3; opacity: .75; }
 /* ---------- Invito a installare l'app: QR (computer, schermata iniziale) e banner (cellulare) ---------- */
@@ -590,6 +594,7 @@ footer p { margin: 0 0 6px; max-width: 65ch; }
     </details>
     <p data-i18n="footer1">Dati negozi: cercatore landi.ch (formato XL) e cercatore agrola.ch (filtro TopShop), stato 26.10.2026.</p>
     <p><span data-i18n="footer2">Agrolandia raccoglie soltanto dati pubblici e non ha alcuna vocazione a sostituirsi a LANDI, AGROLA o al TCS. Agrolandia non rappresenta gli interessi di fenaco né di una sua filiale, ma solo quelli del suo autore. Progetto amatoriale senza scopo commerciale, non affiliato a LANDI né ad AGROLA.</span> <span data-i18n="ver_prezzi">Prezzi verificati:</span> <a href="https://benzin.tcs.ch/" target="_blank" rel="noopener">benzin.tcs.ch</a> · <span data-i18n="ver_orari">Orari verificati:</span> <a href="https://www.landi.ch/" target="_blank" rel="noopener">landi.ch</a></p>
+    <div class="scarica-mob"><button type="button" class="btn" id="scarica-mob" data-i18n="promo_qr">Scarica l'app</button></div>
     <p class="contatto"><span data-i18n="contatto">Ogni lamentela, segnalazione di errori, feedback o commento può essere inviato all'indirizzo</span> <a href="mailto:agrolandia.complaints@gmail.com">agrolandia.complaints@gmail.com</a>.</p>
   </div>
 </footer>
@@ -1622,6 +1627,12 @@ window.addEventListener("appinstalled", () => { $("banner-app").hidden = true; d
     $("inst-aiuto").hidden = false;
   });
 })();
+
+// Piè di pagina sul cellulare: Android/Chrome installa subito; altrimenti apre la pagina dell'app con le istruzioni
+if ($("scarica-mob")) $("scarica-mob").addEventListener("click", async () => {
+  if (promptInstalla) { promptInstalla.prompt(); try { await promptInstalla.userChoice; } catch (e) {} promptInstalla = null; return; }
+  location.href = "./?app=1";
+});
 
 // ---------- Modalità app: tab ----------
 function vaiTab(tab) {
