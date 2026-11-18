@@ -847,9 +847,10 @@ function applicaLingua() {
   $("sez-cerca").setAttribute("aria-label", t("search_aria"));
   $("home").setAttribute("aria-label", t("home_aria"));
   document.querySelectorAll("#lingue button").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.lang === lingua)));
-  // Sito: la lingua scelta va sempre a sinistra, le altre seguono nell'ordine IT, FR, DE; app: ordine fisso DE, FR, IT
+  // Sito su computer: la lingua scelta va sempre a sinistra, le altre seguono nell'ordine IT, FR, DE;
+  // app e sito sul cellulare: ordine fisso DE, FR, IT (cambia solo il colore del tasto scelto)
   const box = $("lingue"), attivo = document.activeElement;
-  (APP ? ["de", "fr", "it"] : [lingua].concat(["it", "fr", "de"].filter(l => l !== lingua))).forEach(l => box.appendChild(box.querySelector('[data-lang="' + l + '"]')));
+  (APP || matchMedia("(max-width: 600px)").matches ? ["de", "fr", "it"] : [lingua].concat(["it", "fr", "de"].filter(l => l !== lingua))).forEach(l => box.appendChild(box.querySelector('[data-lang="' + l + '"]')));
   if (attivo && box.contains(attivo)) attivo.focus();
   riempiCantoni();
   if (stato.ct) $("f-ct").textContent = t("f_ct", { c: stato.ct });
