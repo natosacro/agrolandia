@@ -1,0 +1,205 @@
+{
+ "landi-muri": {
+  "tcs": "CbjePiWilxrTvC99G1Xz",
+  "lat": 47.274042,
+  "lon": 8.341888,
+  "indirizzo": "Zürcherstrasse 1, 5630 Muri AG",
+  "nome": "Agrola Muri AG"
+ },
+ "landi-reinach": {
+  "tcs": "Z0QCFISOTEudqMyYirbo",
+  "lat": 47.264662,
+  "lon": 8.174371,
+  "indirizzo": "Mattenstr. 10, 5734 Reinach AG",
+  "nome": "Agrola Reinach AG"
+ },
+ "landi-bellmund": {
+  "tcs": "3mw622A8bCvEmWpEt41o",
+  "lat": 47.10933,
+  "lon": 7.22401,
+  "indirizzo": "Keltenstr. 47, 2564 Bellmund",
+  "nome": "Agrola Bellmund"
+ },
+ "landi-herzogenbuchsee": {
+  "tcs": "c0l6HTCnBfQ19Hsht2gt",
+  "lat": 47.19578301,
+  "lon": 7.69901076,
+  "indirizzo": "Byfangstrasse 3, 3360 Herzogenbuchsee",
+  "nome": "Agrola Herzogenbuchsee"
+ },
+ "landi-lyssach": {
+  "tcs": "4bjoipt5MFDyBKYzJzv6",
+  "lat": 47.073315700255,
+  "lon": 7.58973167603248,
+  "indirizzo": "Schachenstrasse 39c, 3421 Lyssach",
+  "nome": "AGROLA TopShop"
+ },
+ "landi-steffisburg": {
+  "tcs": "dSEbIwJ4D8S78IPcHPaO",
+  "lat": 46.77255,
+  "lon": 7.63097,
+  "indirizzo": "Glockentalstr. 50, 3612 Steffisburg",
+  "nome": "Agrola Steffisburg"
+ },
+ "landi-aesch": {
+  "tcs": "mtvfo6GRsy6XZZ2BPcFh",
+  "lat": 47.479113,
+  "lon": 7.590453,
+  "indirizzo": "Nordring 2, 4147 Aesch BL",
+  "nome": "Agrola Aesch BL"
+ },
+ "landi-gelterkinden": {
+  "tcs": "ozIEKkbhNBRoEakIsZVU",
+  "lat": 47.46420346,
+  "lon": 7.84328304,
+  "indirizzo": "Sissacherstrasse 40, 4460 Gelterkinden",
+  "nome": "Agrola Gelterkinden"
+ },
+ "landi-bulle": {
+  "tcs": "3V14aXRREAsAXp1hyOMl",
+  "lat": 46.62786,
+  "lon": 7.05928,
+  "indirizzo": "Rte de Riaz 79a, 1630 Bulle",
+  "nome": "Agrola Bulle"
+ },
+ "landi-marly": {
+  "tcs": "qb80CWukomYqgBdPrvFD",
+  "lat": 46.77215,
+  "lon": 7.16038,
+  "indirizzo": "Rte de Chésalles 3, 1723 Marly",
+  "nome": "Agrola Marly"
+ },
+ "landi-alle": {
+  "tcs": "FxiItf1lZhHYHyAGXEd1",
+  "lat": 47.42175,
+  "lon": 7.115,
+  "indirizzo": "Pré Domont 2, 2942 Alle",
+  "nome": "Agrola Alle"
+ },
+ "landi-delemont": {
+  "tcs": "cNAEp5CoZqSmUfVf29TH",
+  "lat": 47.36253,
+  "lon": 7.36015,
+  "indirizzo": "Route de moutier 68, 2800 Delémont",
+  "nome": "Agrola Delémont"
+ },
+ "landi-buchrain": {
+  "tcs": "x3rYYgV9NusASifIbVoD",
+  "lat": 47.10597,
+  "lon": 8.343333,
+  "indirizzo": "Schiltwaldstr. 2, 6033 Buchrain",
+  "nome": "Agrola Buchrain"
+ },
+ "landi-hochdorf": {
+  "tcs": "IDngM44kCJqf7s1by7as",
+  "lat": 47.168962,
+  "lon": 8.282209,
+  "indirizzo": "Lavendelweg 1, 6280 Hochdorf",
+  "nome": "Agrola Hochdorf"
+ },
+ "landi-malters": {
+  "tcs": "WfZrMx5EE6gW4gqaXkJv",
+  "lat": 47.04004,
+  "lon": 8.17994,
+  "indirizzo": "Mettlenmatte 1, 6102 Malters",
+  "nome": "Agrola Malters"
+ },
+ "landi-reiden": {
+  "tcs": "cFNcq480vtUhpdolo0xh",
+  "lat": 47.24564,
+  "lon": 7.960029,
+  "indirizzo": "Dörflimatte 1, 6260 Reiden",
+  "nome": "Agrola Reiden"
+ },
+ "landi-schaffhausen": {
+  "tcs": "ZhqgspXyGOKL5walzENe",
+  "lat": 47.71837441,
+  "lon": 8.66201582,
+  "indirizzo": "Majorenacker 17, 8207 Schaffhausen",
+  "nome": "Agrola Schaffhausen"
+ },
+ "landi-grenchen": {
+  "tcs": "K9crGgOAFGlQT8D5QdhG",
+  "lat": 47.1874,
+  "lon": 7.4085,
+  "indirizzo": "Neckarsulmstrasse 50, 2540 Grenchen",
+  "nome": "Agrola Grenchen"
+ },
+ "landi-wangen-bei-olten": {
+  "tcs": "wd5wvyzPBo7PfggvECWl",
+  "lat": 47.34180557,
+  "lon": 7.86174056,
+  "indirizzo": "Dorfstrasse 5, 4612 Wangen b. Olten",
+  "nome": "Agrola Wangen b. Olten"
+ },
+ "landi-kussnacht": {
+  "tcs": "AKjFcvfcmECTPmCvQXoY",
+  "lat": 47.09283,
+  "lon": 8.449106,
+  "indirizzo": "Zugerstr. 4, 6403 Küssnacht am Rigi",
+  "nome": "Agrola Küssnacht am Rigi"
+ },
+ "landi-schattdorf": {
+  "tcs": "5SAWr6HmhnFGqYCJRXNY",
+  "lat": 46.85745,
+  "lon": 8.63843,
+  "indirizzo": "Umfahrungsstrasse 24, 6467 Schattdorf",
+  "nome": "Agrola Schattdorf"
+ },
+ "landi-lonay": {
+  "tcs": "yICgiQlaGoR6mIlzfpTd",
+  "lat": 46.52649,
+  "lon": 6.52689,
+  "indirizzo": "Ch. d'Etraz 1, 1027 Lonay",
+  "nome": "Agrola Lonay"
+ },
+ "landi-payerne": {
+  "tcs": "m6JmeiFxeo80ciKknMwY",
+  "lat": 46.82747,
+  "lon": 6.92974,
+  "indirizzo": "Charrière d'Estavayer 21, 1530 Payerne",
+  "nome": "Agrola Payerne"
+ },
+ "landi-saxon": {
+  "tcs": "dpK2H64p2BunCumJSLnp",
+  "lat": 46.14735381,
+  "lon": 7.16992411,
+  "indirizzo": "Rte du Léman 12, 1907 Saxon",
+  "nome": "Agrola Saxon"
+ },
+ "landi-adlikon": {
+  "tcs": "nlE1bvTELtGLCo5ndiWZ",
+  "lat": 47.4461014,
+  "lon": 8.4632484,
+  "indirizzo": "Pumpwerkstrasse, 8105 Regensdorf",
+  "nome": "Agrola Regensdorf"
+ },
+ "landi-durnten": {
+  "tcs": "b7quH3Shk5wTkCwXjnJc",
+  "lat": 47.274813,
+  "lon": 8.825781,
+  "indirizzo": "Kreuzstrasse 10, 8635 Dürnten",
+  "nome": "Agrola Dürnten"
+ },
+ "landi-monchaltorf": {
+  "tcs": "6TPGnZvC78aGRw19gfFs",
+  "lat": 47.302786,
+  "lon": 8.720296,
+  "indirizzo": "Mettlenbachstrasse 11, 8617 Mönchaltorf",
+  "nome": "Agrola Mönchaltorf"
+ },
+ "landi-neftenbach": {
+  "tcs": "y7sbKTqn9uH9QUYW3fwN",
+  "lat": 47.52115,
+  "lon": 8.65745,
+  "indirizzo": "Zürichstrasse 44, 8413 Neftenbach",
+  "nome": "Agrola Neftenbach"
+ },
+ "landi-pfaffikon": {
+  "tcs": "GYBTQ10HrHjmrJCnGQ8Q",
+  "lat": 47.371304,
+  "lon": 8.776194,
+  "indirizzo": "Kempttalstr. 90, 8330 Pfäffikon ZH",
+  "nome": "Agrola Pfäffikon ZH"
+ }
+}

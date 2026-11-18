@@ -1,0 +1,8 @@
+{
+  "name": "agrolandia",
+  "private": true,
+  "description": "Aggiornamento giornaliero di prezzi e orari di agrolandia.ch",
+  "dependencies": {
+    "playwright": "1.63.0"
+  }
+}

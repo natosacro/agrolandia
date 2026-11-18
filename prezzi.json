@@ -1,14 +1,14 @@
 {
- "aggiornato": "2026-11-11",
+ "aggiornato": "2026-11-18",
  "nota": "Aggiorna questo file con i prezzi letti alla colonnina o su agrola.ch / benzin.tcs.ch. La pagina lo ricarica da sola ogni 5 minuti.",
  "riferimento": {
   "etichetta": "Media svizzera",
   "fonte": "TCS",
-  "data": "2026-11-11",
-  "bleifrei95": 1.94,
-  "super98": 2.05,
-  "diesel": 2.32,
-  "verificato": "2026-11-18T08:56:34.039Z"
+  "data": "2026-11-18",
+  "bleifrei95": 1.89,
+  "super98": 2.0,
+  "diesel": 2.29,
+  "verificato": "2026-11-18T14:49:55.000Z"
  },
  "stazioni": {
   "landi-muri": {

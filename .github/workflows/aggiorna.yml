@@ -1,0 +1,86 @@
+# Aggiornamento giornaliero di agrolandia.ch: media svizzera TCS, prezzi delle AGROLA (mappa TCS),
+# orari LANDI XL e AGROLA, prezzi di tutti gli AGROLA TopShop. Pubblica i JSON nel sito (GitHub Pages).
+name: Aggiorna prezzi e orari
+
+on:
+  schedule:
+    - cron: "34 8 * * *"   # ogni giorno alle 08:34 UTC (09:34 in inverno, 10:34 in estate in Svizzera)
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pages: write
+
+concurrency:
+  group: aggiorna
+  cancel-in-progress: false
+
+jobs:
+  aggiorna:
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Installa Playwright e Chromium
+        run: |
+          npm install --no-audit --no-fund
+          npx playwright install --with-deps chromium
+
+      - name: Media svizzera (TCS)
+        continue-on-error: true
+        run: python3 strumenti/media_tcs.py
+
+      - name: Orari LANDI XL (landi.ch)
+        continue-on-error: true
+        run: python3 strumenti/orari_landi.py
+
+      - name: Orari AGROLA accanto ai LANDI XL (agrola.ch)
+        continue-on-error: true
+        run: node strumenti/orari_agrola.js
+
+      - name: Prezzi AGROLA accanto ai LANDI XL (mappa TCS)
+        continue-on-error: true
+        run: |
+          node strumenti/prezzi_tcs.js
+          python3 strumenti/unisci_prezzi.py
+
+      - name: Elenco e orari dei TopShop (solo il lunedì)
+        continue-on-error: true
+        run: |
+          if [ "$(date -u +%u)" = "1" ] || [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            node strumenti/topshop.js elenco
+          else
+            echo "Non è lunedì: elenco invariato"
+          fi
+
+      - name: Prezzi di tutti i TopShop (mappa TCS)
+        continue-on-error: true
+        run: |
+          node strumenti/topshop.js prezzi
+          python3 strumenti/topshop_web.py
+
+      - name: Pubblica i dati
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          git config user.name "agrolandia-bot"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A -- '*.json'
+          if git diff --cached --quiet; then
+            echo "Nessun dato cambiato"
+          else
+            git commit -m "Dati del $(date -u +%Y-%m-%d): prezzi e orari"
+            git pull --rebase --autostash origin main
+            git push origin HEAD:main
+            # le spinte fatte con il token di GitHub Actions non avviano da sole la pubblicazione di Pages
+            gh api -X POST "repos/${{ github.repository }}/pages/builds" || true
+          fi
