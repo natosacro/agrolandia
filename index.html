@@ -21,9 +21,9 @@
   const tema = app && JSON.parse(localStorage.getItem("agrolandia.tema") || "null");
   if (tema === "light" || tema === "dark") document.documentElement.dataset.theme = tema;
   // apertura dell'app installata: dopo la schermata gialla del telefono arriva la scritta AGROLANDIA, poi l'app
-  const installata = matchMedia("(display-mode: standalone)").matches || navigator.standalone === true;
+  // (sospesa per l'app installata finché non è allineata alla schermata gialla del telefono; si prova con ?intro)
   const prova = new URLSearchParams(location.search).has("intro");
-  if (app && (installata || prova) && !document.documentElement.classList.contains("vetrina") && !matchMedia("(prefers-reduced-motion: reduce)").matches) {
+  if (app && prova && !document.documentElement.classList.contains("vetrina") && !matchMedia("(prefers-reduced-motion: reduce)").matches) {
     const h = document.documentElement;
     h.classList.add("in-apertura");
     // il conto parte quando la pagina è davvero visibile (con rete lenta il primo disegno può tardare)
@@ -1735,8 +1735,9 @@ document.querySelectorAll("#tab-app button").forEach(b => b.addEventListener("cl
     if (dir !== "h") return;
     e.preventDefault();
     const i = ordine.indexOf(document.documentElement.dataset.tab), bordo = (i === 0 && dx > 0) || (i === ordine.length - 1 && dx < 0);
-    const d = bordo ? dx * 0.25 : dx;
-    muovi(d, 1 - Math.min(0.35, Math.abs(d) / innerWidth * 0.5), 0);
+    // la pagina si sposta poco (al massimo 70 px) e sbiadisce: niente spazio vuoto di lato
+    const d = Math.max(-70, Math.min(70, dx * (bordo ? 0.12 : 0.3)));
+    muovi(d, bordo ? 1 : 1 - Math.min(0.5, Math.abs(dx) / innerWidth * 0.8), 0);
   }, { passive: false });
   document.addEventListener("touchend", () => {
     if (x0 === null) return;
@@ -1744,15 +1745,15 @@ document.querySelectorAll("#tab-app button").forEach(b => b.addEventListener("cl
     if (dir !== "h") return;
     const W = innerWidth, i = ordine.indexOf(document.documentElement.dataset.tab), j = i + (dx < 0 ? 1 : -1);
     const veloce = Math.abs(dx) / Math.max(1, Date.now() - t0) > 0.45 && Math.abs(dx) > 40;
-    if (j < 0 || j >= ordine.length || !(Math.abs(dx) > W * 0.25 || veloce)) { muovi(0, 1, 220); return; }
+    if (j < 0 || j >= ordine.length || !(Math.abs(dx) > W * 0.25 || veloce)) { muovi(0, 1, 200); return; }
     const verso = dx < 0 ? -1 : 1;
-    muovi(verso * W, 0.4, 170);
+    muovi(verso * 70, 0, 120);
     setTimeout(() => {
       vaiTab(ordine[j]);
-      muovi(-verso * W * 0.6, 0.4, 0);
+      muovi(-verso * 50, 0, 0);
       void main.offsetWidth;
-      muovi(0, 1, 230);
-    }, 170);
+      muovi(0, 1, 200);
+    }, 120);
   }, { passive: true });
   document.addEventListener("touchcancel", () => { if (x0 !== null) { x0 = null; muovi(0, 1, 200); } }, { passive: true });
   // anche toccando la barra dei tab il cambio è morbido
