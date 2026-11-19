@@ -20,6 +20,18 @@
   // tema scelto nelle impostazioni dell'app (chiaro / scuro); senza scelta segue il telefono
   const tema = app && JSON.parse(localStorage.getItem("agrolandia.tema") || "null");
   if (tema === "light" || tema === "dark") document.documentElement.dataset.theme = tema;
+  // apertura dell'app installata: dopo la schermata gialla del telefono arriva la scritta AGROLANDIA, poi l'app
+  const installata = matchMedia("(display-mode: standalone)").matches || navigator.standalone === true;
+  const prova = new URLSearchParams(location.search).has("intro");
+  if (app && (installata || prova) && !document.documentElement.classList.contains("vetrina") && !matchMedia("(prefers-reduced-motion: reduce)").matches) {
+    const h = document.documentElement;
+    h.classList.add("in-apertura");
+    // il conto parte quando la pagina è davvero visibile (con rete lenta il primo disegno può tardare)
+    document.addEventListener("DOMContentLoaded", () => requestAnimationFrame(() => {
+      setTimeout(() => h.classList.add("apertura-via"), 1300);
+      setTimeout(() => h.classList.remove("in-apertura", "apertura-via"), 1800);
+    }));
+  }
 } catch (e) {} })();
 /* Statistiche delle visite (GoatCounter): anonime, senza cookie e senza posizione.
    Pagine distinte: sito, app aperta nel browser (dal QR o dal tasto «Scarica l'app»), app installata; copia Wix a parte.
@@ -403,9 +415,21 @@ footer p { margin: 0 0 6px; max-width: 65ch; }
 .lingue button[aria-pressed="true"] { background: var(--barra-testo); color: var(--barra); }
 .lingue button:focus-visible { outline-offset: -3px; }
 .brand-testo { display: grid; gap: 3px; text-align: left; }
+/* apertura dell'app: stessa schermata gialla del telefono, poi arriva la scritta e tutto sfuma nell'app */
+.intro { display: none; }
+html.in-apertura .intro { display: grid; position: fixed; inset: 0; z-index: 300; place-items: center; background: #FFD100; transition: opacity .5s ease; }
+html.in-apertura.apertura-via .intro { opacity: 0; }
+.intro-box { position: relative; display: grid; justify-items: center; }
+.intro-logo { width: 112px; height: 112px; border-radius: 24px; display: block; }
+.intro-nome { position: absolute; top: calc(100% + 22px); left: 50%; transform: translate(-50%, 16px); white-space: nowrap; font: 700 2.3rem/1 var(--display); letter-spacing: .14em; color: #00703A; opacity: 0; animation: introNome .75s .2s cubic-bezier(.2, .7, .2, 1) forwards; }
+@keyframes introNome { to { opacity: 1; transform: translate(-50%, 0); letter-spacing: .06em; } }
+/* app: lo scorrimento tra i tab segue il dito */
+html.app body { overflow-x: clip; }
+html.app main { will-change: transform; }
 .brand .conteggio { font: 500 .74rem/1.1 var(--body); letter-spacing: .02em; text-transform: none; color: var(--barra-testo); opacity: .85; }
 </style>
 
+<div class="intro" id="intro" aria-hidden="true"><div class="intro-box"><svg class="intro-logo" viewBox="0 0 32 32"><rect width="32" height="32" rx="6" fill="#00843D"/><path d="M0 22 C9 15 21 13 32 15 L32 21 C21 19 10 21 0 28 Z" fill="#FFD100"/></svg><b class="intro-nome">AGROLANDIA</b></div></div>
 <header class="top">
   <div class="wrap">
     <button type="button" class="brand" id="home" aria-label="Agrolandia"><svg class="logo" viewBox="0 0 32 32" aria-hidden="true"><rect width="32" height="32" fill="#00843D"/><path d="M0 22 C9 15 21 13 32 15 L32 21 C21 19 10 21 0 28 Z" fill="#FFD100"/></svg> <span class="brand-testo"><span class="brand-nome">Agrolandia</span></span></button>
@@ -1692,24 +1716,49 @@ function vaiTab(tab) {
   window.scrollTo({ top: 0 });
 }
 document.querySelectorAll("#tab-app button").forEach(b => b.addEventListener("click", () => vaiTab(b.dataset.tab)));
-// Scorrere con il dito a sinistra o a destra in qualunque punto dello schermo (non sulla barra dei tab) cambia tab
+// Scorrere con il dito a sinistra o a destra in qualunque punto dello schermo (non sulla barra dei tab) cambia tab:
+// la pagina segue il dito; lasciando, scivola fuori e il tab nuovo entra dal lato opposto
 (() => {
   if (!APP) return;
-  const ordine = ["benzina", "cerca", "preferiti", "info"];
-  let x0 = null, y0 = 0, t0 = 0;
+  const ordine = ["benzina", "cerca", "preferiti", "info"], main = document.querySelector("main");
+  let x0 = null, y0 = 0, t0 = 0, dx = 0, dir = null;
+  const muovi = (x, op, ms) => { main.style.transition = ms ? "transform " + ms + "ms cubic-bezier(.2,.7,.2,1), opacity " + ms + "ms ease" : "none"; main.style.transform = x ? "translateX(" + x + "px)" : ""; main.style.opacity = op === 1 ? "" : op; };
   document.addEventListener("touchstart", e => {
-    const el = e.target;
-    if (e.touches.length !== 1 || el.closest("#tab-app, input, select, textarea, .suggerimenti, #installa")) { x0 = null; return; }
-    x0 = e.touches[0].clientX; y0 = e.touches[0].clientY; t0 = Date.now();
+    if (e.touches.length !== 1 || e.target.closest("#tab-app, input, select, textarea, .suggerimenti, #installa, .intro")) { x0 = null; return; }
+    x0 = e.touches[0].clientX; y0 = e.touches[0].clientY; t0 = Date.now(); dx = 0; dir = null;
   }, { passive: true });
-  document.addEventListener("touchend", e => {
+  document.addEventListener("touchmove", e => {
     if (x0 === null) return;
-    const dx = e.changedTouches[0].clientX - x0, dy = e.changedTouches[0].clientY - y0;
+    dx = e.touches[0].clientX - x0;
+    const dy = e.touches[0].clientY - y0;
+    if (!dir && (Math.abs(dx) > 10 || Math.abs(dy) > 10)) dir = Math.abs(dx) > Math.abs(dy) * 1.2 ? "h" : "v";
+    if (dir !== "h") return;
+    e.preventDefault();
+    const i = ordine.indexOf(document.documentElement.dataset.tab), bordo = (i === 0 && dx > 0) || (i === ordine.length - 1 && dx < 0);
+    const d = bordo ? dx * 0.25 : dx;
+    muovi(d, 1 - Math.min(0.35, Math.abs(d) / innerWidth * 0.5), 0);
+  }, { passive: false });
+  document.addEventListener("touchend", () => {
+    if (x0 === null) return;
     x0 = null;
-    if (Math.abs(dx) < 60 || Math.abs(dx) < Math.abs(dy) * 1.5 || Date.now() - t0 > 800) return;
-    const i = ordine.indexOf(document.documentElement.dataset.tab), j = i + (dx < 0 ? 1 : -1);
-    if (j >= 0 && j < ordine.length) vaiTab(ordine[j]);
+    if (dir !== "h") return;
+    const W = innerWidth, i = ordine.indexOf(document.documentElement.dataset.tab), j = i + (dx < 0 ? 1 : -1);
+    const veloce = Math.abs(dx) / Math.max(1, Date.now() - t0) > 0.45 && Math.abs(dx) > 40;
+    if (j < 0 || j >= ordine.length || !(Math.abs(dx) > W * 0.25 || veloce)) { muovi(0, 1, 220); return; }
+    const verso = dx < 0 ? -1 : 1;
+    muovi(verso * W, 0.4, 170);
+    setTimeout(() => {
+      vaiTab(ordine[j]);
+      muovi(-verso * W * 0.6, 0.4, 0);
+      void main.offsetWidth;
+      muovi(0, 1, 230);
+    }, 170);
   }, { passive: true });
+  document.addEventListener("touchcancel", () => { if (x0 !== null) { x0 = null; muovi(0, 1, 200); } }, { passive: true });
+  // anche toccando la barra dei tab il cambio è morbido
+  document.querySelectorAll("#tab-app button").forEach(b => b.addEventListener("click", () => {
+    if (main.animate) main.animate([{ opacity: 0, transform: "translateY(8px)" }, { opacity: 1, transform: "none" }], { duration: 200, easing: "ease-out" });
+  }));
 })();
 // "con AGROLA" sulle schede LANDI: porta al tab AGROLA sulla TopShop corrispondente (stesso NPA e via, altrimenti la più vicina)
 document.addEventListener("click", e => {
