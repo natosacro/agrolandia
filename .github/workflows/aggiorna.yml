@@ -5,6 +5,7 @@ name: Aggiorna prezzi e orari
 on:
   schedule:
     - cron: "34 8 * * *"   # ogni giorno alle 08:34 UTC (09:34 in inverno, 10:34 in estate in Svizzera)
+    - cron: "7 10 * * *"   # riserva: GitHub a volte salta o ritarda gli avvii programmati
   workflow_dispatch:
 
 permissions:
