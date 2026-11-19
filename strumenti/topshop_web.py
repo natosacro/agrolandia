@@ -23,7 +23,8 @@ for k, v in sorted(d.items(), key=lambda kv: (kv[1].get('ct', ''), kv[1].get('lo
                   modelli.index(sett), spec, 1 if v.get('pompa24') else 0])
     p = v.get('prezzi')
     if p and (p.get('bleifrei95') or p.get('super98') or p.get('diesel')):
-        prezzi[k] = [p.get('bleifrei95'), p.get('super98'), p.get('diesel'), AFF.get(p.get('affidabilita'), '')]
+        r2 = lambda x: round(x, 2) if isinstance(x, (int, float)) else None   # i prezzi TCS a volte arrivano come 2.050000000000004
+        prezzi[k] = [r2(p.get('bleifrei95')), r2(p.get('super98')), r2(p.get('diesel')), AFF.get(p.get('affidabilita'), '')]
         verif = max(verif, p.get('verificato', ''))
 
 sep = (',', ':')
