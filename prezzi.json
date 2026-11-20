@@ -8,7 +8,7 @@
   "bleifrei95": 1.89,
   "super98": 2.0,
   "diesel": 2.29,
-  "verificato": "2026-11-19T17:36:48.000Z"
+  "verificato": "2026-11-20T10:43:01.000Z"
  },
  "stazioni": {
   "landi-muri": {
@@ -18,7 +18,7 @@
    "data": "2026-11-19T17:40:34.987Z",
    "fonte": "TCS",
    "affidabilita": "CONFIDENT",
-   "verificato": "2026-11-19T17:40:34.987Z"
+   "verificato": "2026-11-20T10:46:45.702Z"
   },
   "landi-reinach": {
    "bleifrei95": 1.99,
@@ -27,25 +27,25 @@
    "data": "2026-11-17T15:47:11.636Z",
    "fonte": "TCS",
    "affidabilita": "CONFIDENT",
-   "verificato": "2026-11-19T17:40:58.825Z"
+   "verificato": "2026-11-20T10:47:09.585Z"
   },
   "landi-bellmund": {
    "bleifrei95": 1.89,
    "super98": 1.99,
    "diesel": 2.26,
-   "data": "2026-11-17T15:47:54.889Z",
+   "data": "2026-11-20T10:47:33.323Z",
    "fonte": "TCS",
-   "affidabilita": "FEW_RECENT_PRICES",
-   "verificato": "2026-11-19T17:41:22.653Z"
+   "affidabilita": "OLD_LAST_UPDATE",
+   "verificato": "2026-11-20T10:47:33.323Z"
   },
   "landi-herzogenbuchsee": {
    "bleifrei95": 1.86,
-   "super98": 1.99,
+   "super98": 1.96,
    "diesel": 2.24,
-   "data": "2026-11-19T17:41:46.486Z",
+   "data": "2026-11-20T10:47:57.179Z",
    "fonte": "TCS",
-   "affidabilita": "FEW_RECENT_PRICES",
-   "verificato": "2026-11-19T17:41:46.486Z"
+   "affidabilita": "CONFIDENT",
+   "verificato": "2026-11-20T10:47:57.179Z"
   },
   "landi-lyssach": {
    "bleifrei95": 1.89,
@@ -54,43 +54,43 @@
    "data": "2026-11-19T17:42:10.455Z",
    "fonte": "TCS",
    "affidabilita": "CONFIDENT",
-   "verificato": "2026-11-19T17:42:10.455Z"
+   "verificato": "2026-11-20T10:48:20.918Z"
   },
   "landi-steffisburg": {
    "bleifrei95": 1.89,
    "super98": 2.04,
-   "diesel": 2.22,
-   "data": "2026-11-19T10:56:09.413Z",
+   "diesel": 2.29,
+   "data": "2026-11-20T10:48:44.780Z",
    "fonte": "TCS",
    "affidabilita": "CONFIDENT",
-   "verificato": "2026-11-19T17:42:34.271Z"
+   "verificato": "2026-11-20T10:48:44.780Z"
   },
   "landi-aesch": {
    "bleifrei95": 1.93,
    "super98": 2.03,
-   "diesel": 2.33,
-   "data": "2026-11-18T08:59:28.516Z",
+   "diesel": 2.32,
+   "data": "2026-11-20T10:49:37.250Z",
    "fonte": "TCS",
    "affidabilita": "CONFIDENT",
-   "verificato": "2026-11-19T17:43:26.815Z"
+   "verificato": "2026-11-20T10:49:37.250Z"
   },
   "landi-gelterkinden": {
-   "bleifrei95": 1.87,
+   "bleifrei95": null,
    "super98": 1.95,
    "diesel": 2.27,
-   "data": "2026-11-19T17:43:50.534Z",
+   "data": "2026-11-20T10:50:01.090Z",
    "fonte": "TCS",
    "affidabilita": "FEW_RECENT_PRICES",
-   "verificato": "2026-11-19T17:43:50.534Z"
+   "verificato": "2026-11-20T10:50:01.090Z"
   },
   "landi-bulle": {
-   "bleifrei95": 1.9,
-   "super98": 2.15,
+   "bleifrei95": 1.88,
+   "super98": 2.14,
    "diesel": 2.34,
-   "data": "2026-11-19T17:44:14.352Z",
+   "data": "2026-11-20T10:50:24.811Z",
    "fonte": "TCS",
-   "affidabilita": "CONFIDENT",
-   "verificato": "2026-11-19T17:44:14.352Z"
+   "affidabilita": "FEW_RECENT_PRICES",
+   "verificato": "2026-11-20T10:50:24.811Z"
   },
   "landi-marly": {
    "bleifrei95": 1.99,
@@ -99,7 +99,7 @@
    "data": "2026-11-19T10:58:13.543Z",
    "fonte": "TCS",
    "affidabilita": "OLD_LAST_UPDATE",
-   "verificato": "2026-11-19T17:44:38.182Z"
+   "verificato": "2026-11-20T10:50:48.677Z"
   },
   "landi-alle": {
    "bleifrei95": 1.85,
@@ -108,7 +108,7 @@
    "data": "2026-11-18T09:01:05.696Z",
    "fonte": "TCS",
    "affidabilita": "FEW_RECENT_PRICES",
-   "verificato": "2026-11-19T17:45:02.048Z"
+   "verificato": "2026-11-20T10:51:12.428Z"
   },
   "landi-delemont": {
    "bleifrei95": 1.94,
@@ -117,16 +117,16 @@
    "data": "2026-11-17T15:54:25.930Z",
    "fonte": "TCS",
    "affidabilita": "OLD_LAST_UPDATE",
-   "verificato": "2026-11-19T17:45:25.911Z"
+   "verificato": "2026-11-20T10:51:36.174Z"
   },
   "landi-buchrain": {
    "bleifrei95": 1.89,
    "super98": 2.04,
    "diesel": 2.29,
-   "data": "2026-11-19T17:45:49.791Z",
+   "data": "2026-11-20T10:51:59.912Z",
    "fonte": "TCS",
    "affidabilita": "FEW_RECENT_PRICES",
-   "verificato": "2026-11-19T17:45:49.791Z"
+   "verificato": "2026-11-20T10:51:59.912Z"
   },
   "landi-hochdorf": {
    "bleifrei95": 1.99,
@@ -135,7 +135,7 @@
    "data": "2026-11-19T17:46:13.630Z",
    "fonte": "TCS",
    "affidabilita": "OLD_LAST_UPDATE",
-   "verificato": "2026-11-19T17:46:13.630Z"
+   "verificato": "2026-11-20T10:52:23.761Z"
   },
   "landi-malters": {
    "bleifrei95": 1.89,
@@ -144,7 +144,7 @@
    "data": "2026-11-19T11:00:12.581Z",
    "fonte": "TCS",
    "affidabilita": "FEW_RECENT_PRICES",
-   "verificato": "2026-11-19T17:46:37.476Z"
+   "verificato": "2026-11-20T10:52:47.504Z"
   },
   "landi-reiden": {
    "bleifrei95": 2.07,
@@ -153,7 +153,7 @@
    "data": "2026-11-17T15:57:04.164Z",
    "fonte": "TCS",
    "affidabilita": "OLD_LAST_UPDATE",
-   "verificato": "2026-11-19T17:47:01.209Z"
+   "verificato": "2026-11-20T10:53:11.408Z"
   },
   "landi-schaffhausen": {
    "bleifrei95": 1.94,
@@ -162,34 +162,34 @@
    "data": "2026-11-17T15:57:42.449Z",
    "fonte": "TCS",
    "affidabilita": "FEW_RECENT_PRICES",
-   "verificato": "2026-11-19T17:47:24.923Z"
+   "verificato": "2026-11-20T10:53:35.222Z"
   },
   "landi-grenchen": {
    "bleifrei95": 1.96,
    "super98": 2.06,
    "diesel": 2.34,
-   "data": "2026-11-19T11:01:23.921Z",
+   "data": "2026-11-20T10:53:59.107Z",
    "fonte": "TCS",
-   "affidabilita": "FEW_RECENT_PRICES",
-   "verificato": "2026-11-19T17:47:48.739Z"
+   "affidabilita": "OLD_LAST_UPDATE",
+   "verificato": "2026-11-20T10:53:59.107Z"
   },
   "landi-wangen-bei-olten": {
    "bleifrei95": 1.92,
    "super98": 2.06,
-   "diesel": 2.32,
-   "data": "2026-11-19T17:48:12.419Z",
+   "diesel": 2.34,
+   "data": "2026-11-20T10:54:22.936Z",
    "fonte": "TCS",
    "affidabilita": "FEW_RECENT_PRICES",
-   "verificato": "2026-11-19T17:48:12.419Z"
+   "verificato": "2026-11-20T10:54:22.936Z"
   },
   "landi-kussnacht": {
    "bleifrei95": 1.89,
    "super98": 1.99,
    "diesel": 2.29,
-   "data": "2026-11-19T11:02:11.283Z",
+   "data": "2026-11-20T10:54:46.768Z",
    "fonte": "TCS",
    "affidabilita": "CONFIDENT",
-   "verificato": "2026-11-19T17:48:36.217Z"
+   "verificato": "2026-11-20T10:54:46.768Z"
   },
   "landi-schattdorf": {
    "bleifrei95": 2.16,
@@ -198,16 +198,16 @@
    "data": "2026-11-17T16:00:25.447Z",
    "fonte": "TCS",
    "affidabilita": "OUTDATED_LAST_PRICE_UPDATE",
-   "verificato": "2026-11-19T17:49:00.029Z"
+   "verificato": "2026-11-20T10:55:10.518Z"
   },
   "landi-lonay": {
-   "bleifrei95": 1.94,
+   "bleifrei95": 1.88,
    "super98": 2.16,
    "diesel": 2.29,
-   "data": "2026-11-19T11:03:27.499Z",
+   "data": "2026-11-20T10:56:03.034Z",
    "fonte": "TCS",
    "affidabilita": "CONFIDENT",
-   "verificato": "2026-11-19T17:49:52.429Z"
+   "verificato": "2026-11-20T10:56:03.034Z"
   },
   "landi-payerne": {
    "bleifrei95": 1.75,
@@ -216,16 +216,16 @@
    "data": "2026-11-19T17:50:16.150Z",
    "fonte": "TCS",
    "affidabilita": "FEW_RECENT_PRICES",
-   "verificato": "2026-11-19T17:50:16.150Z"
+   "verificato": "2026-11-20T10:56:26.805Z"
   },
   "landi-saxon": {
    "bleifrei95": 1.9,
-   "super98": 1.99,
+   "super98": 2.04,
    "diesel": 2.31,
-   "data": "2026-11-19T11:04:15.149Z",
+   "data": "2026-11-20T10:56:50.650Z",
    "fonte": "TCS",
    "affidabilita": "FEW_RECENT_PRICES",
-   "verificato": "2026-11-19T17:50:39.916Z"
+   "verificato": "2026-11-20T10:56:50.650Z"
   },
   "landi-adlikon": {
    "bleifrei95": 1.89,
@@ -234,7 +234,7 @@
    "data": "2026-11-19T11:04:38.958Z",
    "fonte": "TCS",
    "affidabilita": "CONFIDENT",
-   "verificato": "2026-11-19T17:51:03.713Z"
+   "verificato": "2026-11-20T10:57:14.498Z"
   },
   "landi-durnten": {
    "bleifrei95": 1.97,
@@ -243,7 +243,7 @@
    "data": "2026-11-18T15:06:12.704Z",
    "fonte": "TCS",
    "affidabilita": "FEW_RECENT_PRICES",
-   "verificato": "2026-11-19T17:51:27.531Z"
+   "verificato": "2026-11-20T10:57:38.364Z"
   },
   "landi-monchaltorf": {
    "bleifrei95": 1.94,
@@ -252,7 +252,7 @@
    "data": "2026-11-17T16:04:58.574Z",
    "fonte": "TCS",
    "affidabilita": "CONFIDENT",
-   "verificato": "2026-11-19T17:51:51.362Z"
+   "verificato": "2026-11-20T10:58:02.094Z"
   },
   "landi-neftenbach": {
    "bleifrei95": 1.95,
@@ -261,7 +261,7 @@
    "data": "2026-11-17T16:05:41.779Z",
    "fonte": "TCS",
    "affidabilita": "FEW_RECENT_PRICES",
-   "verificato": "2026-11-19T17:52:15.310Z"
+   "verificato": "2026-11-20T10:58:25.832Z"
   },
   "landi-pfaffikon": {
    "bleifrei95": 1.89,
@@ -270,7 +270,7 @@
    "data": "2026-11-19T11:06:14.171Z",
    "fonte": "TCS",
    "affidabilita": "CONFIDENT",
-   "verificato": "2026-11-19T17:52:39.144Z"
+   "verificato": "2026-11-20T10:58:49.743Z"
   }
  }
 }
