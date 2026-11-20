@@ -57,7 +57,7 @@ jobs:
       - name: Elenco e orari dei TopShop (solo il lunedì)
         continue-on-error: true
         run: |
-          if [ "$(date -u +%u)" = "1" ] || [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+          if [ "$(date -u +%u)" = "1" ]; then
             node strumenti/topshop.js elenco
           else
             echo "Non è lunedì: elenco invariato"
