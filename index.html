@@ -247,7 +247,6 @@ select.btn { padding-right: 10px; }
 .pop[hidden] { display: none; }
 .pop .segnala { max-width: 22rem; color: var(--inchiostro); box-shadow: 0 12px 32px rgba(0,0,0,.35); }
 .pop .segnala p { margin: 0; font-size: .82rem; color: var(--grigio); }
-.pop .torna-tcs { justify-self: start; padding: 2px 0; border: 0; background: none; color: var(--grigio); font: inherit; font-size: .8rem; text-decoration: underline; cursor: pointer; }
 /* ---------- Invito a installare l'app: QR (computer, schermata iniziale) e banner (cellulare) ---------- */
 .qr-app { display: flex; align-items: center; gap: 18px; margin-top: 16px; padding: 14px 16px; background: var(--carta); border: 1px solid var(--riga); border-left: 4px solid var(--verde); border-radius: 10px; max-width: 34rem; }
 .qr-app[hidden] { display: none; }
@@ -635,11 +634,10 @@ html.app main { will-change: transform; }
       <label for="ts-95"><span data-i18n="f95">Senza piombo 95</span> <input id="ts-95" inputmode="decimal" placeholder="1.94"></label>
       <label for="ts-98"><span data-i18n="f98">Super 98</span> <input id="ts-98" inputmode="decimal" placeholder="2.05"></label>
       <label for="ts-d"><span data-i18n="fd">Diesel</span> <input id="ts-d" inputmode="decimal" placeholder="2.32"></label>
-      <p data-i18n="ts_nota">Il prezzo resta salvato solo sul tuo telefono.</p>
+      <p data-i18n="ts_nota"></p>
       <p class="errore" id="err-ts" hidden></p>
-      <button type="button" class="torna-tcs" id="ts-tcs" data-i18n="ts_tcs" hidden>Torna ai prezzi TCS</button>
-      <div class="riga-btn">
-        <button class="btn primario" type="submit" data-i18n="save">Salva</button>
+            <div class="riga-btn">
+        <button class="btn primario" type="submit" id="ts-invia" data-i18n="ts_invia">Invia</button>
         <button class="btn" type="button" id="ts-annulla" data-i18n="cancel">Annulla</button>
       </div>
     </form>
@@ -692,7 +690,7 @@ const TESTI = {
   h1:"Il LANDI XL più vicino a te in un click", q_label:"Località o NPA", q_ph:"Località o NPA (es. Lugano, 6900)",
   pos:"Usa la mia posizione", ct_aria:"Cantone", ct_opt:"Cantone…",
   pump_aria:"Colonnina con i prezzi della stazione AGROLA più vicina", per_litre:"CHF / LITRO",
-  lcd_search:"Cerco la stazione…", lcd_wait:"in attesa", lcd_avg:"MEDIA CH", lcd_mine:"TUO DATO", ts_nota:"Il prezzo resta salvato solo sul tuo telefono e sostituisce quello del TCS su questa scheda.", ts_tcs:"Torna ai prezzi TCS", lcd_nodata:"nessun dato", lcd_upd:"verif.",
+  lcd_search:"Cerco la stazione…", lcd_wait:"in attesa", lcd_avg:"MEDIA CH", lcd_mine:"TUO DATO", ts_nota:"Il prezzo che invii sarà visibile a tutti gli utenti dell'app per 3 giorni. Lascia vuoto un carburante che non hai visto.", ts_invia:"Invia", ts_segn:"SEGNALATO DA UN UTENTE · {d}", ts_err:"Invio non riuscito: controlla la connessione e riprova.", lcd_nodata:"nessun dato", lcd_upd:"verif.",
   f95u:"SENZA PIOMBO 95", f98u:"SUPER 98", fdu:"DIESEL", f95:"Senza piombo 95", f98:"Super 98", fd:"Diesel",
   src_default:"Prezzi in CHF al litro.",
   src_none:"Prezzi in CHF al litro. Nessun prezzo disponibile: tocca “Ho visto un prezzo”.",
@@ -728,7 +726,7 @@ const TESTI = {
   h1:"Der nächste LANDI XL mit einem Klick", q_label:"Ort oder PLZ", q_ph:"Ort oder PLZ (z. B. Luzern, 6003)",
   pos:"Meinen Standort verwenden", ct_aria:"Kanton", ct_opt:"Kanton…",
   pump_aria:"Zapfsäule mit den Preisen der nächsten AGROLA-Tankstelle", per_litre:"CHF / LITER",
-  lcd_search:"Suche Tankstelle…", lcd_wait:"warte", lcd_avg:"SCHNITT CH", lcd_mine:"DEIN WERT", ts_nota:"Der Preis bleibt nur auf deinem Handy gespeichert und ersetzt auf dieser Karte den TCS-Preis.", ts_tcs:"Zurück zu den TCS-Preisen", lcd_nodata:"keine Daten", lcd_upd:"geprüft",
+  lcd_search:"Suche Tankstelle…", lcd_wait:"warte", lcd_avg:"SCHNITT CH", lcd_mine:"DEIN WERT", ts_nota:"Der Preis, den du sendest, ist 3 Tage lang für alle App-Nutzer sichtbar. Lass einen Treibstoff leer, den du nicht gesehen hast.", ts_invia:"Senden", ts_segn:"VON EINEM NUTZER GEMELDET · {d}", ts_err:"Senden fehlgeschlagen: Prüfe die Verbindung und versuche es erneut.", lcd_nodata:"keine Daten", lcd_upd:"geprüft",
   f95u:"BLEIFREI 95", f98u:"SUPER 98", fdu:"DIESEL", f95:"Bleifrei 95", f98:"Super 98", fd:"Diesel",
   src_default:"Preise in CHF pro Liter.",
   src_none:"Preise in CHF pro Liter. Kein Preis verfügbar: Tippe auf «Ich habe einen Preis gesehen».",
@@ -764,7 +762,7 @@ const TESTI = {
   h1:"Le LANDI XL le plus proche de chez vous en un clic", q_label:"Localité ou NPA", q_ph:"Localité ou NPA (p. ex. Lausanne, 1003)",
   pos:"Utiliser ma position", ct_aria:"Canton", ct_opt:"Canton…",
   pump_aria:"Colonne avec les prix de la station AGROLA la plus proche", per_litre:"CHF / LITRE",
-  lcd_search:"Recherche station…", lcd_wait:"en attente", lcd_avg:"MOYENNE CH", lcd_mine:"VOTRE PRIX", ts_nota:"Le prix reste enregistré uniquement sur votre téléphone et remplace celui du TCS sur cette fiche.", ts_tcs:"Revenir aux prix TCS", lcd_nodata:"aucune donnée", lcd_upd:"vérif.",
+  lcd_search:"Recherche station…", lcd_wait:"en attente", lcd_avg:"MOYENNE CH", lcd_mine:"VOTRE PRIX", ts_nota:"Le prix que vous envoyez sera visible par tous les utilisateurs de l'appli pendant 3 jours. Laissez vide un carburant que vous n'avez pas vu.", ts_invia:"Envoyer", ts_segn:"SIGNALÉ PAR UN UTILISATEUR · {d}", ts_err:"Envoi impossible : vérifiez la connexion et réessayez.", lcd_nodata:"aucune donnée", lcd_upd:"vérif.",
   f95u:"SANS PLOMB 95", f98u:"SUPER 98", fdu:"DIESEL", f95:"Sans plomb 95", f98:"Super 98", fd:"Diesel",
   src_default:"Prix en CHF par litre.",
   src_none:"Prix en CHF par litre. Aucun prix disponible : touchez « J'ai vu un prix ».",
@@ -1221,43 +1219,82 @@ document.addEventListener("click", e => {
   document.querySelectorAll('.cuore[data-ts="' + id + '"]').forEach(x => { const on = i < 0; x.setAttribute("aria-pressed", String(on)); x.setAttribute("aria-label", t(on ? "pref_rem" : "pref_add")); x.title = t(on ? "pref_rem" : "pref_add"); });
   if (document.documentElement.dataset.tab === "preferiti") renderPreferiti();
 });
-// "Ho visto un prezzo" sulle TopShop dell'app: salvato solo sul telefono, sostituisce i prezzi TCS su quella scheda
-const mieTs = () => store.get("agrolandia.segnalazioni_ts", {}) || {};
+// "Ho visto un prezzo" sulle TopShop dell'app: segnalazioni condivise tra tutti gli utenti, nel CMS Wix
+// (collezione SegnalazioniPrezzi: lettura e inserimento per chiunque, modifica e cancellazione solo dall'admin).
+// Si mostra la segnalazione più recente degli ultimi 3 giorni; i carburanti non segnalati restano quelli del TCS.
+const WIX_CLIENT = "c57ebd2f-f45e-4255-8f62-28588737ee31", WIX_API = "https://www.wixapis.com";
+const SEGN_GIORNI = 3;
+let SEGN = {};
+async function tokenWix(nuovo) {
+  const t = store.get("agrolandia.wixtok", null);
+  if (!nuovo && t && t.scade - 60000 > Date.now()) return t.acc;
+  const body = !nuovo && t && t.ref ? { clientId: WIX_CLIENT, grantType: "refresh_token", refreshToken: t.ref } : { clientId: WIX_CLIENT, grantType: "anonymous" };
+  let r = await fetch(WIX_API + "/oauth2/token", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
+  if (!r.ok && body.grantType !== "anonymous") return tokenWix(true);
+  if (!r.ok) throw new Error("token " + r.status);
+  const d = await r.json();
+  store.set("agrolandia.wixtok", { acc: d.access_token, ref: d.refresh_token, scade: Date.now() + d.expires_in * 1000 });
+  return d.access_token;
+}
+async function wixDati(percorso, corpo) {
+  let tok = await tokenWix();
+  const vai = t => fetch(WIX_API + percorso, { method: "POST", headers: { "Content-Type": "application/json", Authorization: t }, body: JSON.stringify(corpo) });
+  let r = await vai(tok);
+  if (r.status === 401) r = await vai(await tokenWix(true));
+  if (!r.ok) throw new Error("wix " + r.status);
+  return r.json();
+}
+const dataWix = v => (v && v.$date) || v || null;
+async function caricaSegnalazioni() {
+  if (!APP) return;
+  try {
+    const da = new Date(Date.now() - SEGN_GIORNI * 864e5).toISOString();
+    const d = await wixDati("/wix-data/v2/items/query", { dataCollectionId: "SegnalazioniPrezzi",
+      query: { filter: { _createdDate: { $gt: { $date: da } } }, sort: [{ fieldName: "_createdDate", order: "DESC" }], paging: { limit: 1000 } } });
+    const nuove = {};
+    (d.dataItems || []).forEach(x => { const r = x.data || {}; if (r.ts && !nuove[r.ts]) nuove[r.ts] = { bleifrei95: r.bleifrei95 ?? null, super98: r.super98 ?? null, diesel: r.diesel ?? null, data: dataWix(r._createdDate) }; });
+    if (JSON.stringify(nuove) !== JSON.stringify(SEGN)) { SEGN = nuove; aggiornaSchede(); }
+  } catch (e) { /* senza rete restano i prezzi TCS */ }
+}
+const fmtQuando = s => { const d = new Date(s); if (isNaN(d)) return ""; try { return d.toLocaleString(LOCALE[lingua], { day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit" }); } catch (e) { return d.toLocaleString(); } };
 function prezziTs(v) {
-  const m = mieTs()[v.id];
-  if (m) return Object.assign({}, m, { nota: t("lcd_mine") + " · " + fmtData(m.data) });
+  const m = SEGN[v.id], tcs = v.prezzi || {};
+  if (m) return { bleifrei95: m.bleifrei95 ?? tcs.bleifrei95, super98: m.super98 ?? tcs.super98, diesel: m.diesel ?? tcs.diesel, nota: t("ts_segn", { d: fmtQuando(m.data) }) };
   return v.prezzi && Object.assign({ data: v.prezzi.verificato }, v.prezzi);
 }
 let tsAperta = null;
 function chiudiPopTs() { $("pop-prezzo").hidden = true; $("err-ts").hidden = true; tsAperta = null; }
 function aggiornaSchede() { renderBenzina(); if (document.documentElement.dataset.tab === "preferiti") renderPreferiti(); }
 if (APP) {
+  caricaSegnalazioni();
+  setInterval(caricaSegnalazioni, 5 * 60 * 1000);
+  document.addEventListener("visibilitychange", () => { if (!document.hidden) caricaSegnalazioni(); });
   document.addEventListener("click", e => {
     const b = e.target.closest(".vedo-prezzo"); if (!b || !TOPSHOP) return;
     const v = TOPSHOP.find(x => x.id === b.dataset.ts); if (!v) return;
     tsAperta = v;
-    const m = mieTs()[v.id], s = m || v.prezzi || {};
+    const s = prezziTs(v) || {};
     $("ts-titolo").textContent = v.nome + " " + v.loc;
-    $("ts-95").value = s.bleifrei95 || ""; $("ts-98").value = s.super98 || ""; $("ts-d").value = s.diesel || "";
-    $("ts-tcs").hidden = !m;
+    [["ts-95", s.bleifrei95, "1.94"], ["ts-98", s.super98, "2.05"], ["ts-d", s.diesel, "2.32"]].forEach(([id, x, def]) => { $(id).value = ""; $(id).placeholder = fmtPrezzo(x) || def; });
+    $("ts-invia").disabled = false;
     $("pop-prezzo").hidden = false;
   });
   $("ts-annulla").addEventListener("click", chiudiPopTs);
   $("pop-prezzo").addEventListener("click", e => { if (e.target === $("pop-prezzo")) chiudiPopTs(); });
   document.addEventListener("keydown", e => { if (e.key === "Escape" && !$("pop-prezzo").hidden) chiudiPopTs(); });
-  $("ts-tcs").addEventListener("click", () => {
-    const tutte = mieTs(); delete tutte[tsAperta.id]; store.set("agrolandia.segnalazioni_ts", tutte);
-    chiudiPopTs(); aggiornaSchede();
-  });
-  $("form-ts").addEventListener("submit", e => {
+  $("form-ts").addEventListener("submit", async e => {
     e.preventDefault();
     const leggi = id => { const x = $(id).value.trim().replace(",", "."); return x ? parseFloat(x) : null; };
     const vals = { bleifrei95: leggi("ts-95"), super98: leggi("ts-98"), diesel: leggi("ts-d") };
+    const err = $("err-ts");
     const bad = Object.values(vals).some(x => x !== null && (!isFinite(x) || x < 1 || x > 4));
-    if (bad || Object.values(vals).every(x => x === null)) { $("err-ts").textContent = t("err_form"); $("err-ts").hidden = false; return; }
-    const tutte = mieTs(); tutte[tsAperta.id] = Object.assign(vals, { data: new Date().toISOString() });
-    store.set("agrolandia.segnalazioni_ts", tutte);
-    chiudiPopTs(); aggiornaSchede();
+    if (bad || Object.values(vals).every(x => x === null)) { err.textContent = t("err_form"); err.hidden = false; return; }
+    const v = tsAperta; $("ts-invia").disabled = true;
+    try {
+      await wixDati("/wix-data/v2/items", { dataCollectionId: "SegnalazioniPrezzi", dataItem: { data: Object.assign({ ts: v.id, nome: v.nome + " " + v.loc }, vals) } });
+      SEGN[v.id] = Object.assign({}, vals, { data: new Date().toISOString() });
+      chiudiPopTs(); aggiornaSchede();
+    } catch (x) { err.textContent = t("ts_err"); err.hidden = false; $("ts-invia").disabled = false; }
   });
 }
 // barra di ricerca del tab Benzina (stesse località e NPA della ricerca LANDI)
